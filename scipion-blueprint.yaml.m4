@@ -10,7 +10,7 @@ define(_NODE_SWCOMPONENT_,  ifdef(`_CFM_',`gromacs.nodes.MonitoredSoftwareCompon
 
 dnl *** From gromacs-inputs.yaml.m4 take only macros, drop regular texts.
 divert(`-1')dnl
-include(gromacs-inputs.yaml.m4)dnl
+include(scipion-inputs.yaml.m4)dnl
 divert(`0')dnl
 
 imports:
@@ -153,15 +153,15 @@ node_templates:
 
 
 
-#  olinStorage:
-#    type: cloudify.occi.nodes.Volume
-#    properties:
-#      size: { get_input: olin_scratch_size }
-#      availability_zone: { get_input: olin_availability_zone }
-#      occi_config: *occi_configuration
-#    relationships:
-#      - type: cloudify.occi.relationships.volume_contained_in_server
-#        target: olinNode
+  olinStorage:
+    type: cloudify.occi.nodes.Volume
+    properties:
+      size: { get_input: olin_scratch_size }
+      availability_zone: { get_input: olin_availability_zone }
+      occi_config: *occi_configuration
+    relationships:
+      - type: cloudify.occi.relationships.volume_contained_in_server
+        target: olinNode
 
 
 
