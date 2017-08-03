@@ -71,7 +71,7 @@ resources/ssh_gromacs/id_rsa:
 resources/gromacs-portal:
 #	git clone $(GROMACS_PORTAL) $@
 
-resources/puppet.tar.gz: resources/puppet/site/gromacs/files/private/gromacs-portal.tar.gz
+resources/puppet.tar.gz: 
 	tar -czvf $@ -C resources/puppet/ .
 
 
