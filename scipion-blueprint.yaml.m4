@@ -125,7 +125,7 @@ node_templates:
   olinNode:
     type: _NODE_SERVER_
     properties:
-      name: 'Gromacs all-in-one server node'
+      name: 'Scipion all-in-one server node'
       resource_config:
         os_tpl: { get_input: olin_os_tpl }
         resource_tpl: { get_input: olin_resource_tpl }
@@ -134,6 +134,16 @@ node_templates:
       cloud_config: *cloud_configuration
       occi_config: *occi_configuration
       fabric_env: *fabric_env
+
+  olinStorage:
+    type: cloudify.occi.nodes.Volume
+    properties:
+      size: { get_input: olin_scratch_size }
+      availability_zone: { get_input: olin_availability_zone }
+      occi_config: *occi_configuration
+    relationships:
+      - type: cloudify.occi.relationships.volume_contained_in_server
+        target: olinNode
 
   scipion:
     type: _NODE_WEBSERVER_
@@ -147,9 +157,16 @@ node_templates:
         <<: *puppet_config
         manifests:
           start: manifests/scipion.pp
+        hiera:
+          westlife::volume::device: /dev/vdc
+          westlife::volume::fstype: ext4
+          westlife::volume::mountpoint: /data
+          westlife::volume::mode: '1777'
     relationships:
       - type: cloudify.relationships.contained_in
         target: olinNode
+      - type: cloudify.relationships.depends_on
+        target: olinStorage
 
 
 
