@@ -109,7 +109,7 @@ file { 'ScipionUserData':
 
 file { '/home/cfy/ScipionUserData':
   ensure => link,
-  target => '/data/ScipionUserData'
+  target => '/data/ScipionUserData',
   before  => Exec['configure'],
 }
 
