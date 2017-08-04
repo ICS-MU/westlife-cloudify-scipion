@@ -5,7 +5,9 @@ resources { 'firewall':
 
 include ::firewall
 include wget
+include ::westlife::volume
 #include ::archive
+
 $binary_file = 'scipion_v1.0.1_2016-06-30_linux64.tgz'
 
 ############################################################
@@ -87,6 +89,27 @@ file { 'own_scipion':
   group   => 'cfy',
   path    => '/opt/scipion',
   recurse => true,
+  before  => File['ScipionUserData'],
+}
+
+##############################################################
+# Create ScipionUserData directory
+
+file { 'ScipionUserData':
+  ensure => directory,
+  owner   => 'cfy',
+  group   => 'cfy',
+  path => '/data/ScipionUserData',
+  mode => '0644',
+  before => File['/home/cfy/ScipionUserData'],
+}
+
+##############################################################
+# Create ScipionUserData link
+
+file { '/home/cfy/ScipionUserData':
+  ensure => link,
+  target => '/data/ScipionUserData'
   before  => Exec['configure'],
 }
 

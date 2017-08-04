@@ -43,7 +43,7 @@ function install_pc1_agent() {
         PC_REPO=$(ctx_node_properties 'puppet_config.repo')
         if [ "x${PC_REPO}" != 'x' ]; then
             if [ -n "${IS_YUM}" ]; then
-                sudo -n rpm -i "${PC_REPO}" 
+                sudo -n rpm -i "${PC_REPO}"
             elif [ -n "${IS_APT}" ]; then
                 local PC_REPO_PKG=$(mktemp)
                 wget -O "${PC_REPO_PKG}" "${PC_REPO}"
@@ -59,7 +59,7 @@ function install_pc1_agent() {
         if [ "x${PC_PACKAGE}" != 'x' ]; then
             if [ -n "${IS_YUM}" ]; then
                 sudo -n yum -y -q install "${PC_PACKAGE}"
-            elif [ -n "${IS_APT}" ]; then 
+            elif [ -n "${IS_APT}" ]; then
                 sudo -n apt-get -y install "${PC_PACKAGE}" >/dev/null
             fi
         else
@@ -199,15 +199,20 @@ cd ${MANIFESTS}
 # run Puppet
 ctx logger info "Puppet: running manifest ${MANIFEST}"
 
-PUPPET_OUT=$(LANG=C LC_ALL=C sudo -En /opt/puppetlabs/bin/puppet apply \
+#PUPPET_OUT=$(LANG=C LC_ALL=C sudo -En /opt/puppetlabs/bin/puppet apply \
+#    --hiera_config="${HIERA_DIR}/hiera.yaml" \
+#    --modulepath="${MANIFESTS}/modules:${MANIFESTS}/site:${FACTS_DIR}" \
+##    ${MANIFEST} 2>&1)
+
+
+sudo -En /opt/puppetlabs/bin/puppet apply \
     --hiera_config="${HIERA_DIR}/hiera.yaml" \
     --modulepath="${MANIFESTS}/modules:${MANIFESTS}/site:${FACTS_DIR}" \
-    --verbose --logdest=syslog --logdest=console --color=no --detailed-exitcodes \
-    ${MANIFEST} 2>&1)
+    --verbose ${MANIFEST}
 
 PUPPET_RTN=$?
 
-ctx logger info "Puppet: ${PUPPET_OUT}"
+#ctx logger info "Puppet: ${PUPPET_OUT}"
 ctx logger info 'Puppet: done'
 
 # https://docs.puppet.com/puppet/latest/man/apply.html

@@ -6,7 +6,7 @@ class westlife::volume (
   $group = 'root',
   $mode  = '0777'
 ) {
-  exec { "/usr/bin/mkdir ${mountpoint}":
+  exec { "/bin/mkdir ${mountpoint}":
     creates => $mountpoint,
   }
 
@@ -17,7 +17,7 @@ class westlife::volume (
       fstype  => $fstype,
       atboot  => true,
       options => 'defaults',
-      require => Exec["/usr/bin/mkdir ${mountpoint}"],
+      require => Exec["/bin/mkdir ${mountpoint}"],
       before  => File[$mountpoint],
     }
   }
