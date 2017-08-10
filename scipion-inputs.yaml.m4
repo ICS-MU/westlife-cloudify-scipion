@@ -45,7 +45,7 @@ cc_private_key_filename: 'ifdef(`_CFM_',`/opt/manager/resources/blueprints/_CFM_
 olin_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
 
 # sizing
-olin_resource_tpl: 'large'
+olin_resource_tpl: 'medium'
 
 # availability zone
 olin_availability_zone: 'uuid_fedcloud_cerit_sc_103'
@@ -84,23 +84,5 @@ define(_WORKERS_,       2)dnl	# initial workers count
 define(_WORKERS_MIN_,   1)dnl	# minimum workers with autoscaling
 define(_WORKERS_MAX_,   3)dnl	# maximum workers with autoscaling
 
-
-############################################
-# Application
-
-# version of CUDA Toolkit deployed on GPU workers
-cuda_release: '7.0'
-
-# enable https:// only access on the web portal secured by Let's Encrypt
-gromacs_portal_enable_ssl: False #if True, setup valid admin e-mail below
-
-# your valid contact e-mail address
-gromacs_portal_admin_email: 'root@localhost'
-
-# SSH public key of the unprivileged gromacs user used for the computation
-gromacs_user_public_key: 'include(`resources/ssh_gromacs/id_rsa.pub')'
-
-# SSH private key of the gromacs user
-gromacs_user_private_key_b64: 'esyscmd(base64 -w0 resources/ssh_gromacs/id_rsa)'
 
 # vim: set syntax=yaml
