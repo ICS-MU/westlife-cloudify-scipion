@@ -80,16 +80,6 @@ inputs:
     type: integer
 
   # Application parameters
-  cuda_release:
-    type: string
-  gromacs_portal_enable_ssl:
-    type: boolean
-  gromacs_portal_admin_email:
-    type: string
-  gromacs_user_public_key:
-    type: string
-  gromacs_user_private_key_b64:
-    type: string
 
 dsl_definitions:
   occi_configuration: &occi_configuration
@@ -184,7 +174,7 @@ node_templates:
 
 outputs:
   web_endpoint:
-    description: Gromacs portal endpoint
+    description: Scipion portal endpoint
     value:
       url: { concat: ['http://', { get_attribute: [olinNode, ip] }] }
 

@@ -1,6 +1,6 @@
 forge "https://forge.puppetlabs.com"
 
-mod "puppetlabs/stdlib",    "4.12.0"
+mod "puppetlabs/stdlib",    "4.17.1"
 mod "puppetlabs/concat",    "2.2.0"
 mod "puppetlabs/apache",    "1.10.0"
 mod "puppetlabs/firewall",  "1.8.1"
@@ -14,3 +14,4 @@ mod "puppet/archive",       "1.1.2"
 #mod 'stahnma/epel',         '1.2.2'
 mod 'puppet/letsencrypt',   '1.0.1'
 mod "maestrodev-wget",       "1.7.3"
+mod 'derdanne-nfs', '2.0.4'
