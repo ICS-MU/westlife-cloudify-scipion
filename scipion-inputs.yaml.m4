@@ -58,8 +58,8 @@ olin_scratch_size: 30
 # Worker node deployment parameters
 
 # OS template
-worker_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
-
+#worker_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
+worker_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
 
 # sizing
 worker_resource_tpl: 'medium'
