@@ -161,10 +161,8 @@ nfs::server::export{ '/opt':
 }
 
 ##############################################################
-# Install Onedata client
+# Download Onedata client
 
-############################################################
-# Download binary version
 wget::fetch { 'Onedata_install_script':
   source      => "${onedataurl}",
   destination =>'/tmp/',
@@ -172,6 +170,9 @@ wget::fetch { 'Onedata_install_script':
   verbose     => false,
   before      => Exec['onedata-client'],
 }
+
+############################################################
+# Install Onedata client
 
 exec {'onedata-client':
   command     => "sh /tmp/oneclient.sh",
