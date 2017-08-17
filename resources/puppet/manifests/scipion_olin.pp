@@ -9,7 +9,7 @@ include ::westlife::volume
 #include ::archive
 
 $binary_file = 'scipion_v1.0.1_2016-06-30_linux64.tgz'
-
+$onedataurl = 'http://get.onedata.org/oneclient.sh'
 ############################################################
 # Install Scipion prerequisities
 
@@ -35,7 +35,6 @@ package { ['tk-dev']:
   ensure => present,
   require => Exec['apt-get-update'],
 }
-
 
 
 #package { ['mc','gcc-c++','glibc-headers','gcc','cmake']:
@@ -145,7 +144,6 @@ file { 'delete_binary':
 
 }
 
-
 ##############################################################
 # Create NFS shares (TODO)
 
@@ -160,4 +158,23 @@ nfs::server::export{ '/data/ScipionUserData':
 nfs::server::export{ '/opt':
   ensure  => 'mounted',
   clients => '(rw,sync,no_root_squash,no_subtree_check)'
+}
+
+##############################################################
+# Install Onedata client
+
+############################################################
+# Download binary version
+wget::fetch { 'Onedata_install_script':
+  source      => "${onedataurl}",
+  destination =>'/tmp/',
+  timeout     => 0,
+  verbose     => false,
+  before      => Exec['onedata-client'],
+}
+
+exec {'onedata-client':
+  command     => "sh /tmp/oneclient.sh",
+  path        => '/bin',
+  environment => ["PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"]
 }
