@@ -27,7 +27,7 @@ exec { 'apt-get-update':
   require => Exec['add-apt-repository'],
 }
 
-package { ['openjdk-8-jdk','libopenmpi-dev','openmpi-bin','gfortran']:
+package { ['openjdk-8-jdk','libopenmpi-dev','openmpi-bin','gfortran','cmake']:
   ensure => present,
   require => Exec['apt-get-update'],
 }
@@ -123,6 +123,19 @@ exec {'configure':
   environment => 'HOME=/home/cfy',
   before  => File['create_service'],
 }
+
+
+##############################################################
+# Install chimera
+#
+#exec {'chimera':
+#  command => 'python /opt/scipion/scipion install chimera 2> /tmp/chimera.log',
+#  path    => '/usr/bin/',
+#  user    => 'cfy',
+#  environment => 'HOME=/home/cfy',
+#  after  => Exec['configure'],
+#}
+
 
 ##############################################################
 # Create directory /services
