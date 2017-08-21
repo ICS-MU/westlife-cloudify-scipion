@@ -8,7 +8,7 @@ include wget
 include ::westlife::volume
 #include ::archive
 
-$binary_file = 'scipion_v1.0.1_2016-06-30_linux64.tgz'
+$binary_file = 'scipion_v1.0.1_with_chimera.tgz'
 $onedataurl = 'http://get.onedata.org/oneclient.sh'
 ############################################################
 # Install Scipion prerequisities
