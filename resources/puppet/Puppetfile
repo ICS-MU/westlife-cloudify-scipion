@@ -16,3 +16,4 @@ mod 'puppet/letsencrypt',   '1.0.1'
 mod "maestrodev-wget",       "1.7.3"
 mod 'derdanne-nfs',          '2.0.4'
 mod "puppetlabs/java",       "2.1.0"
+mod "camptocamp/kmod",       "2.1.0"

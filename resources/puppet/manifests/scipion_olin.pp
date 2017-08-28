@@ -12,14 +12,14 @@ $binary_file = 'scipion_v1.0.1_with_chimera.tgz'
 $onedataurl = 'http://get.onedata.org/oneclient.sh'
 
 # CUDA runtime
-#kmod::load { 'nouveau':
-#  ensure => absent,
-#}
+kmod::load { 'nouveau':
+  ensure => absent,
+}
 
 class {'cuda':
   release         => '7.0',
   install_toolkit => false,
-#  require         => Kmod::Load['nouveau'],
+  require         => Kmod::Load['nouveau'],
 }
 
 exec { 'nvidia-xconfig':
