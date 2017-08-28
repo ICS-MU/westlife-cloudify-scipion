@@ -208,12 +208,13 @@ ctx logger info "Puppet: running manifest ${MANIFEST}"
 sudo -En /opt/puppetlabs/bin/puppet apply \
     --hiera_config="${HIERA_DIR}/hiera.yaml" \
     --modulepath="${MANIFESTS}/modules:${MANIFESTS}/site:${FACTS_DIR}" \
-    --verbose ${MANIFEST}
+    --verbose --detailed-exitcodes ${MANIFEST}
 
 PUPPET_RTN=$?
 
 #ctx logger info "Puppet: ${PUPPET_OUT}"
 ctx logger info 'Puppet: done'
+ctx logger info "Puppet exit code: ${PUPPET_RTN}"
 
 # https://docs.puppet.com/puppet/latest/man/apply.html
 # 0: The run succeeded with no changes or failures; the system was already in the desired state.
