@@ -8,6 +8,7 @@ include wget
 include ::westlife::volume
 #include ::archive
 
+$binary_folder = 'http://webserver.ics.muni.cz/westlife'
 $binary_file = 'scipion_v1.0.1_with_chimera.tgz'
 $onedataurl = 'http://get.onedata.org/oneclient.sh'
 
@@ -118,7 +119,7 @@ package { ['tk-dev']:
 ############################################################
 # Download binary version
 wget::fetch { 'Download binary':
-  source      => "http://dior.ics.muni.cz/~cuda/${binary_file}",
+  source      => "${binary_folder}${binary_file}",
   destination =>'/opt/',
   timeout     => 0,
   verbose     => false,
