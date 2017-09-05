@@ -158,34 +158,32 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: olinStorage
 
-  workerNode:
-    type: _NODE_SERVER_
-    properties:
-      name: 'Scipion Worker node'
-      resource_config:
-        os_tpl: { get_input: worker_os_tpl }
-        resource_tpl: { get_input: worker_resource_tpl }
-        availability_zone: { get_input: worker_availability_zone }
-      agent_config: *agent_configuration
-      cloud_config: *cloud_configuration
-      occi_config: *occi_configuration
-      fabric_env: *fabric_env
+#  workerNode:
+#    type: _NODE_SERVER_
+#    properties:
+#      resource_config:
+#        os_tpl: { get_input: worker_os_tpl }
+#        resource_tpl: { get_input: worker_resource_tpl }
+#        availability_zone: { get_input: worker_availability_zone }
+#      agent_config: *agent_configuration
+#      cloud_config: *cloud_configuration
+#      occi_config: *occi_configuration
+#      fabric_env: *fabric_env
 
-  scipionWorker:
-    type: _NODE_WEBSERVER_
-    instances:
-      deploy: 1
-    properties:
-      fabric_env:
-        <<: *fabric_env
-        host_string: { get_attribute: [workerNode, ip] }
-      puppet_config:
-        <<: *puppet_config
-        manifests:
-          start: manifests/scipion_worker.pp
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: workerNode
+#  scipionWorker:
+#    type: _NODE_WEBSERVER_
+#    instances:
+#      deploy: 1
+#    properties:
+#      fabric_env:
+#        <<: *fabric_env
+#        host_string: { get_attribute: [workerNode, ip] }
+#      puppet_config:
+#        manifests:
+#          start: manifests/scipion_worker.pp
+#    relationships:
+#      - type: cloudify.relationships.contained_in
+#        target: workerNode
 
 
 
@@ -194,10 +192,10 @@ outputs:
     description: Scipion portal endpoint
     value:
       url: { concat: ['http://', { get_attribute: [olinNode, ip] }] }
-  worker_ip:
-    description: Worker IP
-    value:
-      ip: { get_attribute: [workerNode,ip] }
+#  worker_ip:
+#    description: Worker IP
+#    value:
+#      ip: { get_attribute: [workerNode,ip] }
 
 
 # vim: set syntax=yaml

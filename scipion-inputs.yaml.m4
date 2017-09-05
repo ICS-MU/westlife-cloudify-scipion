@@ -43,6 +43,8 @@ cc_private_key_filename: 'ifdef(`_CFM_',`/opt/manager/resources/blueprints/_CFM_
 # OS template
 #olin_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
 olin_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
+#olin_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_268'
+
 
 # sizing
 olin_resource_tpl: 'medium'
@@ -59,7 +61,8 @@ olin_scratch_size: 30
 
 # OS template
 #worker_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
-worker_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
+#worker_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
+worker_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_268'
 
 # sizing
 worker_resource_tpl: 'medium'
