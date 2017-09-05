@@ -4,15 +4,15 @@ local-storage/
 
 # Sensitive data
 resources/ssh*/
-resources/gromacs-portal/
+
 resources/puppet.tar.gz
-resources/puppet/site/gromacs/files/private/
+
 
 # Generated blueprints
-cfy-gromacs-blueprint.yaml
-cfy-gromacs-inputs.yaml
-cfm-gromacs-blueprint.yaml
-cfm-gromacs-inputs.yaml
+cfy-scipion-blueprint.yaml
+cfy-scipion-inputs.yaml
+cfm-scipion-blueprint.yaml
+cfm-scipion-inputs.yaml
 
 # Other
 get-cloudify.py
