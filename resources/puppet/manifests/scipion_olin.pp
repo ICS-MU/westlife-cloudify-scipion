@@ -87,7 +87,8 @@ exec { 'apt-get-update':
   require => Exec['add-apt-repository'],
 }
 
-package { ['openjdk-8-jdk','libopenmpi-dev','openmpi-bin','gfortran','cmake']:
+# openjdk-8-jdk
+package { ['libopenmpi-dev','openmpi-bin','gfortran','cmake']:
   ensure => present,
   require => Exec['apt-get-update'],
 }

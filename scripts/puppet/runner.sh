@@ -28,6 +28,7 @@ ctx_node_properties() {
 #install python
 function install_python() {
      if ! python --version &>/dev/null; then
+         ctx logger info 'Installing Python'
          if [ -n "${IS_YUM}" ]; then
              sudo -n yum -yq install python
          elif [ -n "${IS_APT}" ]; then
