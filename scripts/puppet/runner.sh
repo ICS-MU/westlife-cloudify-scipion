@@ -25,6 +25,20 @@ ctx_node_properties() {
     echo "${PROP}"
 }
 
+#install python
+function install_python() {
+     if ! python --version &>/dev/null; then
+         if [ -n "${IS_YUM}" ]; then
+             sudo -n yum -yq install python
+         elif [ -n "${IS_APT}" ]; then
+             for i in {1..10}; do
+                 sudo -n apt-get -y install python >/dev/null && break
+                 sleep 6
+             done
+         fi
+     fi
+}
+
 # install jq
 function install_jq() {
     if ! jq --version &>/dev/null; then
@@ -147,6 +161,7 @@ function puppet_facts() {
 CTX_SIDE="${relationship_side:-$1}"
 
 # install Puppet on very first run
+install_python
 install_jq
 install_pc1_agent
 
