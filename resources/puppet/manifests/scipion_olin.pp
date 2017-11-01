@@ -262,15 +262,15 @@ exec {'websockify_install':
   environment => ["PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"]
 }
 
-vcsrepo { "/opt/novnc/"
+vcsrepo { "/opt/novnc/":
   ensure    => present,
-  provider  => git
-  source    => 'https://github.com/novnc/noVNC'
-  depth     => '1'
+  provider  => git,
+  source    => 'https://github.com/novnc/noVNC',
+  depth     => '1',
 
 }
 
 exec {'websockify_exec':
-  command   => "websockify 8000 localhost:5901 -D "
-  path      => '/usr/local/bin'
+  command   => "websockify 8000 localhost:5901 -D --web /opt/novnc",
+  path      => '/usr/local/bin',
 }
