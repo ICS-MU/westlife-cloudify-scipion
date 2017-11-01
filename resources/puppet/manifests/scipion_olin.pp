@@ -92,7 +92,7 @@ package { ['libopenmpi-dev','openmpi-bin','gfortran','cmake']:
   ensure => present,
   require => Exec['apt-get-update'],
 }
-package { ['tk-dev']:
+package { ['tk-dev','python-pip']:
   ensure => present,
   require => Exec['apt-get-update'],
 }
@@ -252,4 +252,25 @@ exec {'onedata-client':
   command     => "sh /tmp/oneclient.sh",
   path        => '/bin',
   environment => ["PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"]
+}
+
+#############################################################
+#Install websockify
+exec {'websockify_install':
+  command     => "pip install websockify",
+  path        => '/usr/bin',
+  environment => ["PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"]
+}
+
+vcsrepo { "/opt/novnc/"
+  ensure    => present,
+  provider  => git
+  source    => 'https://github.com/novnc/noVNC'
+  depth     => '1'
+
+}
+
+exec {'websockify_exec':
+  command   => "websockify 8000 localhost:5901 -D "
+  path      => '/usr/local/bin'
 }
