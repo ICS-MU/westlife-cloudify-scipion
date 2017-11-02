@@ -255,22 +255,5 @@ exec {'onedata-client':
 }
 
 #############################################################
-#Install websockify
-exec {'websockify_install':
-  command     => "pip install websockify",
-  path        => '/usr/bin',
-  environment => ["PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"]
-}
-
-vcsrepo { "/opt/novnc/":
-  ensure    => present,
-  provider  => git,
-  source    => 'https://github.com/novnc/noVNC',
-  depth     => '1',
-
-}
-
-exec {'websockify_exec':
-  command   => "websockify 8000 localhost:5901 -D --web /opt/novnc",
-  path      => '/usr/local/bin',
-}
+#Install websockify&novnc
+include websockify
