@@ -21,13 +21,6 @@ file {'/etc/systemd/system/websockify.service':
   before => Service['websockify'],
 }
 
-#exec {'websockify_enable':
-#  command     => "systemctl enable websockify.service",
-#  path        => '/bin',
-#  before      => Service['websockify'],
-
-#}
-
 service {'websockify':
   ensure => 'running',
   enable => 'true',
