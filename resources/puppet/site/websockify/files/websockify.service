@@ -1,0 +1,11 @@
+[Unit]
+Description=websockify.service
+After=network.target
+
+[Service]
+#Type=forking
+ExecStart=/usr/local/bin/websockify 8000 localhost:5901 --web /opt/novnc
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
