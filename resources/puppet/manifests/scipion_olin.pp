@@ -10,6 +10,7 @@ include ::westlife::volume
 
 $binary_folder = 'http://webserver.ics.muni.cz/westlife/'
 $binary_file = 'scipion_v1.0.1_with_chimera.tgz'
+#$binary_file = 'scipion_v1.1_2017-06-14_with_chimera.tgz'
 $onedataurl = 'http://get.onedata.org/oneclient.sh'
 
 # CUDA runtime
@@ -65,6 +66,7 @@ class { 'turbovnc':
     1 => {
       'user' => 'cfy',
       'args' => '-geometry 800x600 -nohttpd -xstartup openbox',
+#      'args' => '-geometry 1024x768 -nohttpd -xstartup openbox',
     },
   },
 }
@@ -236,23 +238,7 @@ nfs::server::export{ '/opt':
 
 ##############################################################
 # Download Onedata client
-
-wget::fetch { 'Onedata_install_script':
-  source      => "${onedataurl}",
-  destination =>'/tmp/',
-  timeout     => 0,
-  verbose     => false,
-  before      => Exec['onedata-client'],
-}
-
-############################################################
-# Install Onedata client
-
-exec {'onedata-client':
-  command     => "sh /tmp/oneclient.sh",
-  path        => '/bin',
-  environment => ["PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"]
-}
+include onedata
 
 #############################################################
 #Install websockify&novnc
