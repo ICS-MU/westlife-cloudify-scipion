@@ -10,7 +10,6 @@ vcsrepo { "/opt/novnc/":
 exec {'websockify_install':
   command     => "pip install websockify",
   path        => '/usr/bin',
-#  environment => ["PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"],
   before => Service['websockify'],
 }
 
