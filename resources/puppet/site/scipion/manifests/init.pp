@@ -1,5 +1,5 @@
 class scipion {
-  require puppetlabs/java
+  require java
 
   $binary_folder = 'http://webserver.ics.muni.cz/westlife/'
   #$binary_file = 'scipion_v1.0.1_with_chimera.tgz'
@@ -62,8 +62,15 @@ class scipion {
   }
 
   ##############################################################
+  # Create ~/.config/scipion directory
+  file {['/home/cfy/.config','/home/cfy/.config/scipion']:
+    ensure => directory,
+    before => File['/home/cfy/.config/scipion/scipion.conf']
+}
+
+  ##############################################################
   # Copy scipion.conf to .config
-  file {'/home/cfy/.config/scipion/scipion.conf'}
+  file {'/home/cfy/.config/scipion/scipion.conf':
     ensure => present,
     source => 'puppet:///modules/scipion/scipion.conf',
     before => Exec['configure']

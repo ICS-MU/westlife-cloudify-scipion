@@ -127,15 +127,15 @@ nfs::server::export{ '/opt':
   clients => '(rw,sync,no_root_squash,no_subtree_check)'
 }
 
-class {scipion:
+class {'scipion':
 }
 
 ##############################################################
 # Download Onedata client
-class {onedata:
+class {'onedata':
 }
 
 #############################################################
 #Install websockify&novnc
-class {websockify:
+class {'websockify':
 }
