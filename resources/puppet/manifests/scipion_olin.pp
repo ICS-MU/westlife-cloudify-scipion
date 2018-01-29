@@ -5,7 +5,7 @@ resources { 'firewall':
 
 include ::firewall
 include wget
-include ::westlife::volume
+#include ::westlife::volume
 #include ::archive
 
 

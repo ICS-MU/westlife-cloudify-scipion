@@ -2,7 +2,8 @@
 # OCCI authentication options
 
 # OCCI server URL, defaults to the CESNET's FedCloud site
-occi_endpoint: 'https://carach5.ics.muni.cz:11443'
+#occi_endpoint: 'https://carach5.ics.muni.cz:11443'
+occi_endpoint: 'https://nova3.ui.savba.sk:8787/occi1.1'
 
 # OCCI authentication method, valid options: x509, token, basic, digest, none
 occi_auth: 'x509'
@@ -44,16 +45,36 @@ cc_private_key_filename: 'ifdef(`_CFM_',`/opt/manager/resources/blueprints/_CFM_
 #olin_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
 #olin_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
 #olin_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_268'
-olin_os_tpl:  'uuid_gputestmc_egi_ubuntu_server_16_04_lts_cerit_sc_270'
+#olin_os_tpl:  'uuid_gputestmc_egi_ubuntu_server_16_04_lts_cerit_sc_270'
+
+# Image for EGI Ubuntu 14.04 [Ubuntu/14.04/VirtualBox]
+#olin_os_tpl: '7ccf5309-4a00-4ba7-a744-423fe121638a'
+
+# Image for EGI CentOS 7 [CentOS/7/VirtualBox]
+#olin_os_tpl: '9b6748ad-bc31-4dbe-9c97-dff49e711b1a'
+
+# Image for EGI Docker Ubuntu 16.04 [Ubuntu/16.04/VirtualBox]
+olin_os_tpl: 'db5ad854-8a36-4e75-b064-3b09fd61eff4'
+
+# Flavor: m1.medium
+olin_resource_tpl: '3'
 
 # sizing
-olin_resource_tpl: 'medium'
+#olin_resource_tpl: 'medium'
 
 # availability zone
-olin_availability_zone: 'uuid_fedcloud_cerit_sc_103'
+#olin_availability_zone: 'uuid_fedcloud_cerit_sc_103'
 
 # scratch size (in GB)
-olin_scratch_size: 30
+#olin_scratch_size: 30
+
+# network
+olin_network: 'http://nova3.ui.savba.sk:8774/occi1.1/network/PUBLIC'
+
+# network pool
+olin_network_pool: ''
+
+
 
 
 ############################################

@@ -41,6 +41,16 @@ class scipion {
   }
 
   ##############################################################
+  # Create Data directory if not exists
+
+  file { 'Data':
+    ensure => directory,
+    path => '/data',
+    before => File['ScipionUserData'],
+  }
+
+
+  ##############################################################
   # Create ScipionUserData directory
 
   file { 'ScipionUserData':

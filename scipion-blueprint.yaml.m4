@@ -66,10 +66,14 @@ inputs:
     type: string
   olin_resource_tpl:
     type: string
-  olin_availability_zone:
+#  olin_availability_zone:
+#    type: string
+  olin_network:
     type: string
-  olin_scratch_size:
-    type: integer
+  olin_network_pool:
+    type: string
+#  olin_scratch_size:
+#    type: integer
   worker_os_tpl:
     type: string
   worker_resource_tpl:
@@ -119,21 +123,23 @@ node_templates:
       resource_config:
         os_tpl: { get_input: olin_os_tpl }
         resource_tpl: { get_input: olin_resource_tpl }
-        availability_zone: { get_input: olin_availability_zone }
+#        availability_zone: { get_input: olin_availability_zone }
+        network: { get_input: olin_network}
+        network_pool: { get_input: olin_network_pool }
       agent_config: *agent_configuration
       cloud_config: *cloud_configuration
       occi_config: *occi_configuration
       fabric_env: *fabric_env
 
-  olinStorage:
-    type: cloudify.occi.nodes.Volume
-    properties:
-      size: { get_input: olin_scratch_size }
-      availability_zone: { get_input: olin_availability_zone }
-      occi_config: *occi_configuration
-    relationships:
-      - type: cloudify.occi.relationships.volume_contained_in_server
-        target: olinNode
+#  olinStorage:
+#    type: cloudify.occi.nodes.Volume
+#    properties:
+#      size: { get_input: olin_scratch_size }
+#      availability_zone: { get_input: olin_availability_zone }
+#      occi_config: *occi_configuration
+#    relationships:
+#      - type: cloudify.occi.relationships.volume_contained_in_server
+#        target: olinNode
 
   scipion:
     type: _NODE_WEBSERVER_
@@ -147,16 +153,16 @@ node_templates:
         <<: *puppet_config
         manifests:
           start: manifests/scipion_olin.pp
-        hiera:
-          westlife::volume::device: /dev/vdc
-          westlife::volume::fstype: ext4
-          westlife::volume::mountpoint: /data
-          westlife::volume::mode: '1777'
+#        hiera:
+#          westlife::volume::device: /dev/vdc
+#          westlife::volume::fstype: ext4
+#          westlife::volume::mountpoint: /data
+#          westlife::volume::mode: '1777'
     relationships:
       - type: cloudify.relationships.contained_in
         target: olinNode
-      - type: cloudify.relationships.depends_on
-        target: olinStorage
+#      - type: cloudify.relationships.depends_on
+#        target: olinStorage
 
 #  workerNode:
 #    type: _NODE_SERVER_
