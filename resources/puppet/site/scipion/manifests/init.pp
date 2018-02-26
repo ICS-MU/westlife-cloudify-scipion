@@ -65,6 +65,8 @@ class scipion {
   # Create ~/.config/scipion directory
   file {['/home/cfy/.config','/home/cfy/.config/scipion']:
     ensure => directory,
+    owner   => 'cfy',
+    group   => 'cfy',
     before => File['/home/cfy/.config/scipion/scipion.conf']
 }
 
@@ -73,6 +75,8 @@ class scipion {
   file {'/home/cfy/.config/scipion/scipion.conf':
     ensure => present,
     source => 'puppet:///modules/scipion/scipion.conf',
+    owner   => 'cfy',
+    group   => 'cfy',
     before => Exec['configure']
 }
 
