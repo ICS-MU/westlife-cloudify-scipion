@@ -28,14 +28,15 @@ ctx_node_properties() {
 #install python
 function install_python() {
      if ! python --version &>/dev/null; then
-         ctx logger info 'Installing Python'
          if [ -n "${IS_YUM}" ]; then
              sudo -n yum -yq install python
          elif [ -n "${IS_APT}" ]; then
              for i in {1..10}; do
+                 sudo -n apt-get -y update >/dev/null
                  sudo -n apt-get -y install python >/dev/null && break
                  sleep 6
              done
+             ctx logger info 'Python just installed.'
          fi
      fi
 }
