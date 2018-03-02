@@ -27,5 +27,8 @@ class turbovnc (
     turbovnc::password { $user:
       password => $password,
     }
+  turbovnc::xstartup { $user:
+      password => $password,
+    }
   }
 }
