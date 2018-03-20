@@ -1,9 +1,9 @@
 class scipion {
   require java
 
-  $binary_folder = 'http://webserver.ics.muni.cz/westlife/'
+  $binary_folder = 'http://scipion.cnb.csic.es/downloads/scipion/software/binary/'
   #$binary_file = 'scipion_v1.0.1_with_chimera.tgz'
-  $binary_file = 'scipion_v1.1_2017-06-14_with_chimera.tgz'
+  $binary_file = 'scipion_V1.2.beta_26-12-2017_linux64.tgz'
 
   ############################################################
   # Download binary version
@@ -88,20 +88,21 @@ class scipion {
     path    => '/usr/bin/',
     user    => 'cfy',
     environment => 'HOME=/home/cfy',
-    before  => File['create_service'],
+    before  => Exec['chimera'],
   }
 
 
   ##############################################################
   # Install chimera
   #
-  #exec {'chimera':
-  #  command => 'python /opt/scipion/scipion install chimera 2> /tmp/chimera.log',
-  #  path    => '/usr/bin/',
-  #  user    => 'cfy',
-  #  environment => 'HOME=/home/cfy',
-  #  after  => Exec['configure'],
-  #}
+  exec {'chimera':
+    command => 'python /opt/scipion/scipion install --no-xmipp chimera > /tmp/chimera.log',
+#    path    => '/usr/bin/',
+    user    => 'cfy',
+    environment => 'HOME=/home/cfy',
+    provider => 'shell',
+    before  => File['create_service'],
+  }
 
 
   ##############################################################
@@ -112,7 +113,7 @@ class scipion {
     owner   => 'cfy',
     group   => 'cfy',
     path    => '/services',
-  #  before  => File['delete_binary'],
+    before  => File['delete_binary'],
   }
 
   ##############################################################
