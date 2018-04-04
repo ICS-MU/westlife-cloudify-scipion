@@ -16,6 +16,8 @@ cfm-scipion-inputs.yaml
 
 # Other
 get-cloudify.py
+describe.json
+tst.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
