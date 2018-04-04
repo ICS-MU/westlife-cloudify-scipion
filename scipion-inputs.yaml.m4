@@ -55,6 +55,9 @@ olin_availability_zone: 'uuid_fedcloud_cerit_sc_103'
 # scratch size (in GB)
 olin_scratch_size: 30
 
+#VNC password
+olin_vnc_password: 'Scipion4All'
+
 
 ############################################
 # Worker node deployment parameters
