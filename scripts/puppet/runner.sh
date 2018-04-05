@@ -160,14 +160,21 @@ function puppet_facts() {
 
 #############################
 
+echo "Runner.sh starting"
+
 CTX_SIDE="${relationship_side:-$1}"
 
-# install Puppet on very first run
+# install python
 install_python
+
+# install jq
 install_jq
+
+# install Puppet on very first run
 install_pc1_agent
 
 CTX_TYPE=$(ctx type)
+
 CTX_OPERATION_NAME=$(ctx operation name | rev | cut -d. -f1 | rev)
 MANIFEST="${manifest:-$(ctx_node_properties "puppet_config.manifests.${CTX_OPERATION_NAME}" 2>/dev/null)}"
 if [ "x${MANIFEST}" = 'x' ]; then
@@ -210,6 +217,16 @@ HIERA_DIR=$(mktemp -d "${MANIFESTS}/hiera.XXXXXX")
 puppet_hiera "${HIERA_DIR}"
 FACTS_DIR=$(mktemp -d "${MANIFESTS}/facts.XXXXXX")
 puppet_facts "${FACTS_DIR}"
+
+ctx logger info "CTX_OPERATION_NAME=${CTX_OPERATION_NAME}"
+ctx logger info "CTX_TYPE=${CTX_TYPE}"
+ctx logger info "CTX_SIDE=${CTX_SIDE}"
+ctx logger info "CTX_NODE_NAME=${CTX_NODE_NAME}"
+ctx logger info "CTX_NODE_PROPS=${CTX_NODE_PROPS}"
+ctx logger info "CTX_DEPLOYMENT_ID=${CTX_DEPLOYMENT_ID}"
+ctx logger info "CTX_WORKFLOW_ID=${CTX_WORKFLOW_ID}"
+ctx logger info "CTX_CAPS=${CTX_CAPS}"
+
 
 cd ${MANIFESTS}
 

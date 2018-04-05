@@ -32,7 +32,7 @@ exec { 'nvidia-xconfig':
 ensure_packages(['lightdm', 'xfce4', 'xterm', 'mesa-utils'])
 
 class { 'turbovnc':
-  passwords => { 'cfy' => 'Scipion4u'},
+  passwords => { 'cfy' => lookup('westlife::vnc::password') },
   servers   => {
     1 => {
       'user' => 'cfy',
