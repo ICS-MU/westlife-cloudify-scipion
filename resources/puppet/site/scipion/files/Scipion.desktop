@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Scipion
+Comment=Scipion run with vglrun
+Exec=/opt/VirtualGL/bin/vglrun /opt/scipion/scipion
+Icon=/opt/scipion/pyworkflow/resources/scipion_logo.png
+Path=
+Terminal=true
+StartupNotify=false
