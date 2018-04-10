@@ -20,12 +20,15 @@ class turbovnc (
   contain turbovnc::service
 
   Class['turbovnc::install']
-    -> Class['turbovnc::config']
-    ~> Class['turbovnc::service']
+  -> Class['turbovnc::config']
+  ~> Class['turbovnc::service']
 
   $passwords.each |String $user, String $password| {
-    turbovnc::password { $user:
-      password => $password,
-    }
+  turbovnc::password { $user:
+    password => $password,
   }
+  turbovnc::xstartup { $user:
+    password => $password,
+  }
+}
 }

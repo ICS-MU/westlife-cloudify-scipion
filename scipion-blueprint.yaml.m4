@@ -82,6 +82,8 @@ inputs:
     type: string
   worker_scratch_size:
     type: integer
+  olin_vnc_password:
+    type: string
 
   # Application parameters
 
@@ -153,11 +155,12 @@ node_templates:
         <<: *puppet_config
         manifests:
           start: manifests/scipion_olin.pp
-#        hiera:
+        hiera:
 #          westlife::volume::device: /dev/vdc
 #          westlife::volume::fstype: ext4
 #          westlife::volume::mountpoint: /data
 #          westlife::volume::mode: '1777'
+           westlife::vnc::password: { get_input: olin_vnc_password }
     relationships:
       - type: cloudify.relationships.contained_in
         target: olinNode

@@ -1,7 +1,7 @@
 ############################################
 # OCCI authentication options
 
-# OCCI server URL, defaults to the CESNET's FedCloud site
+# OCCI server URL, defaults to the IISAS's FedCloud site
 #occi_endpoint: 'https://carach5.ics.muni.cz:11443'
 occi_endpoint: 'https://nova3.ui.savba.sk:8787/occi1.1'
 
@@ -16,6 +16,7 @@ occi_password: ''
 
 # OCCI path to user's x509 credentials
 occi_user_cred: '/tmp/x509up_u1000'
+occi_user_cred: '/home/ldelcano/myproxy-enmr.pem'
 
 # OCCI path to CA certificates directory
 occi_ca_path: ''
@@ -53,11 +54,12 @@ cc_private_key_filename: 'ifdef(`_CFM_',`/opt/manager/resources/blueprints/_CFM_
 # Image for EGI CentOS 7 [CentOS/7/VirtualBox]
 #olin_os_tpl: '9b6748ad-bc31-4dbe-9c97-dff49e711b1a'
 
-# Image for EGI Docker Ubuntu 16.04 [Ubuntu/16.04/VirtualBox]
-olin_os_tpl: 'db5ad854-8a36-4e75-b064-3b09fd61eff4'
+# Image for Ubuntu Server 16.04 LTS [Ubuntu/16.04/KVM]
+olin_os_tpl: '603509fd-35ce-4e9f-bb89-475fc3fc9694'
 
-# Flavor: m1.medium
-olin_resource_tpl: '3'
+# Flavor: gpu1cpu2
+olin_resource_tpl: '1gpu2cpu'
+#olin_resource_tpl: '3'
 
 # sizing
 #olin_resource_tpl: 'medium'
@@ -74,7 +76,8 @@ olin_network: 'http://nova3.ui.savba.sk:8774/occi1.1/network/PUBLIC'
 # network pool
 olin_network_pool: ''
 
-
+#VNC password
+olin_vnc_password: 'Scipion4All'
 
 
 ############################################

@@ -9,4 +9,5 @@ class virtualgl (
   $_package = inline_template("${package_url_base}${package_url_name}")
 
   contain virtualgl::install
+  contain virtualgl::config
 }

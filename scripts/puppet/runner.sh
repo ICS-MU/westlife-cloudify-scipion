@@ -33,9 +33,11 @@ function install_python() {
              sudo -n yum -yq install python
          elif [ -n "${IS_APT}" ]; then
              for i in {1..10}; do
+                 sudo -n apt-get -y update >/dev/null
                  sudo -n apt-get -y install python >/dev/null && break
                  sleep 6
              done
+             ctx logger info 'Python just installed.'
          fi
      fi
 }
@@ -158,6 +160,8 @@ function puppet_facts() {
 
 
 #############################
+
+echo "Runner.sh starting"
 
 CTX_SIDE="${relationship_side:-$1}"
 
