@@ -2,4 +2,5 @@
 
 
 
-Please, see the [Wiki](https://github.com/ICS-MU/westlife-cloudify-gromacs/wiki) for the deployment steps.
+Please, see the [Wiki](https://github.com/ICS-MU/westlife-cloudify-scipion/wiki) for the deployment steps.
+
