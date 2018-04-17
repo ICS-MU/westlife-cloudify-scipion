@@ -37,7 +37,8 @@ class scipion {
     group   => 'cfy',
     path    => '/opt/scipion',
     recurse => true,
-    before  => File['ScipionUserData'],
+    #before  => File['ScipionUserData'],
+    before  => File['Data'],
   }
 
   ##############################################################
@@ -73,44 +74,46 @@ class scipion {
 
   ##############################################################
   # Create ~/.config/scipion directory
-  file {['/home/cfy/.config','/home/cfy/.config/scipion']:
-    ensure => directory,
-    owner   => 'cfy',
-    group   => 'cfy',
-    before => File['/home/cfy/.config/scipion/scipion.conf']
-}
+  #file {['/home/cfy/.config','/home/cfy/.config/scipion']:
+  #  ensure => directory,
+  #  owner   => 'cfy',
+  #  group   => 'cfy',
+  #  before => File['/home/cfy/.config/scipion/scipion.conf']
+#}
 
   ##############################################################
   # Copy scipion.conf to .config
-  file {'/home/cfy/.config/scipion/scipion.conf':
-    ensure => present,
-    source => 'puppet:///modules/scipion/scipion.conf',
-    owner   => 'cfy',
-    group   => 'cfy',
-    before => Exec['configure']
-}
+  #file {'/home/cfy/.config/scipion/scipion.conf':
+  #  ensure => present,
+  #  source => 'puppet:///modules/scipion/scipion.conf',
+  #  owner   => 'cfy',
+  #  group   => 'cfy',
+  #  before => Exec['configure']
+#}
 
   ##############################################################
   # Configure Scipion
 
   exec {'configure':
-    command => 'python /opt/scipion/scipion config 2> /tmp/sciconf.log',
+    command => 'python /opt/scipion/scipion config --notify > /tmp/sciconf.log',
     path    => '/usr/bin/',
     user    => 'cfy',
     environment => 'HOME=/home/cfy',
-    before  => File['/home/cfy/Desktop/scipion.desktop']
+    before  => Exec['modify_config']
   }
 
-  ##############################################################
-  # Create a desktop shortcut
-  file {'/home/cfy/Desktop/scipion.desktop':
-    ensure => present,
-    source => 'puppet:///modules/scipion/Scipion.desktop',
-    owner   => 'cfy',
-    group   => 'cfy',
-    before => Exec['chimera']
+ ##############################################################
+  # Modify Scipion CUDA variables to point to cuda instead of cuda-7.5
+
+  exec {'modify_config':
+    command => 'sed -i -e "s+/usr/local/cuda-7.5+/usr/local/cuda+g" /opt/scipion/config/scipion.conf',
+    path    => '/bin/',
+    user => 'cfy',
+    environment => 'HOME=/home/cfy',
+    before  => Exec['chimera']
   }
 
+  #############################################################
   exec {'chimera':
     command => 'python /opt/scipion/scipion install --no-xmipp chimera > /tmp/chimera.log',
     user    => 'cfy',
@@ -123,11 +126,11 @@ class scipion {
   # Install relion
   #
   exec {'relion':
-    command => 'python /opt/scipion/scipion install --no-xmipp relion-2.0 > /tmp/relion.log',
+    command => 'python /opt/scipion/scipion install --no-xmipp relion > /tmp/relion.log',
     user    => 'cfy',
     environment => 'HOME=/home/cfy',
     provider => 'shell',
-    #before  => Exec['ctffind4'],
+    before  => Exec['ctffind4'],
   }
 
   ##############################################################
@@ -168,7 +171,7 @@ class scipion {
   file { 'delete_binary':
     ensure  => absent,
     path    => '/opt/${binary_file}',
-    before  => Exec['delete_packages_binaries']
+    before  => Exec['delete_packages_binaries'],
   }
 
   ##############################################################
@@ -178,6 +181,16 @@ class scipion {
     command => 'rm /opt/scipion/software/em/*.tgz',
     user    => 'cfy',
     environment => 'HOME=/home/cfy',
-    provider => 'shell'
+    provider => 'shell',
+    before  => File['/home/cfy/Desktop/scipion.desktop'],
+  }
+
+  ##############################################################
+  # Create a desktop shortcut
+  file {'/home/cfy/Desktop/scipion.desktop':
+    ensure => present,
+    source => 'puppet:///modules/scipion/Scipion.desktop',
+    owner   => 'cfy',
+    group   => 'cfy',
   }
 }

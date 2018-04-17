@@ -18,7 +18,7 @@ kmod::load { 'nouveau':
 
 class {'cuda':
   release         => '8.0',
-  install_toolkit => false,
+  install_toolkit => true,
   require         => Kmod::Load['nouveau'],
 }
 
