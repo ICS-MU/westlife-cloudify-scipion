@@ -11,6 +11,25 @@ include ::westlife::volume
 
 $onedataurl = 'http://get.onedata.org/oneclient.sh'
 
+
+#letsencrypt
+
+class { '::letsencrypt':
+        email               => 'pesa@ics.muni.cz',
+        unsafe_registration => true,
+      }
+
+letsencrypt::certonly { $fqdn:
+        plugin               => 'standalone',
+        manage_cron          => true,
+        cron_before_command  => '/bin/systemctl stop websockify.service',
+        cron_success_command => '/bin/systemctl restart websockify.service',
+        suppress_cron_output => true,
+        before               => Class['websockify'],
+      }
+
+
+
 # CUDA runtime
 kmod::load { 'nouveau':
   ensure => absent,
