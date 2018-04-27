@@ -13,6 +13,11 @@ exec {'websockify_install':
   before => Service['websockify'],
 }
 
+exec { 'fqdnfile':
+  command => "echo FQDN=$(hostname -f) > /tmp/fqdnvar.txt",
+  path    =>'/bin',
+  before => Service['websockify'],
+}
 
 file {'/etc/systemd/system/websockify.service':
 	ensure => present,

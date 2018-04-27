@@ -4,7 +4,8 @@ After=network.target
 
 [Service]
 #Type=forking
-ExecStart=/usr/local/bin/websockify 8000 localhost:5901 --web /opt/novnc
+EnvironmentFile=/tmp/fqdnvar.txt
+ExecStart=/usr/local/bin/websockify 8000 localhost:5901 --web /opt/novnc --cert /etc/letsencrypt/live/${FQDN}/fullchain.pem --key /etc/letsencrypt/live/${FQDN}/privkey.pem
 Restart=on-failure
 
 [Install]
