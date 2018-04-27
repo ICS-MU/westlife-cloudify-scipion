@@ -36,7 +36,7 @@ class { 'turbovnc':
   servers   => {
     1 => {
       'user' => 'cfy',
-      'args' => '-geometry 800x600 -nohttpd',
+      'args' => '-geometry 1024x768 -nohttpd',
 #      'args' => '-geometry 1024x768 -nohttpd -xstartup openbox',
     },
   },

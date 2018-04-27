@@ -195,7 +195,7 @@ outputs:
   web_endpoint:
     description: Scipion portal endpoint
     value:
-      url: { concat: ['http://', { get_attribute: [olinNode, ip] },':8001'] }
+      url: { concat: ['http://', { get_attribute: [olinNode, ip] },':8000'] }
 #  worker_ip:
 #    description: Worker IP
 #    value:
