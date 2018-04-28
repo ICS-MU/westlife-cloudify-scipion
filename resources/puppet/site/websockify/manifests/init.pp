@@ -14,8 +14,7 @@ exec {'websockify_install':
 }
 
 exec { 'fqdnfile':
-  command => "echo FQDN=$(hostname -f) > /tmp/fqdnvar.txt",
-  path    =>'/bin',
+  command => "/bin/echo FQDN=$(/bin/hostname -f) > /opt/fqdnvar.txt",
   before => Service['websockify'],
 }
 
