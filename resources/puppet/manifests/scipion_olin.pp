@@ -59,11 +59,11 @@ class { 'turbovnc':
 #      'args' => '-geometry 1024x768 -nohttpd -xstartup openbox',
     },
   },
-  before => File['10-xhost'],
+  before => File['10-xhost.conf'],
 }
 
-file {'10-xhost':
-  path => "/etc/lightdm/lightdm.conf.d/10-xhost",
+file {'10-xhost.conf':
+  path => "/etc/lightdm/lightdm.conf.d/10-xhost.conf",
   content => "[SeatDefaults]\ndisplay-setup-script=xhost +",
 }
 #include chimera
