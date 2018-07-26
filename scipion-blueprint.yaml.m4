@@ -1,25 +1,37 @@
+---
+
 tosca_definitions_version: cloudify_dsl_1_3
 
 description: >
-  Gromacs portal setup via FedCloud OCCI and Puppet.
-
-define(_NODE_SERVER_,       ifdef(`_CFM_',`gromacs.nodes.MonitoredServer',`gromacs.nodes.Server'))dnl
-define(_NODE_TORQUESERVER_, ifdef(`_CFM_',`gromacs.nodes.MonitoredTorqueServer',`gromacs.nodes.TorqueServer'))dnl
-define(_NODE_WEBSERVER_,    ifdef(`_CFM_',`gromacs.nodes.MonitoredWebServer', `gromacs.nodes.WebServer'))dnl
-define(_NODE_SWCOMPONENT_,  ifdef(`_CFM_',`gromacs.nodes.MonitoredSoftwareComponent', `gromacs.nodes.SoftwareComponent'))dnl
+  Scipion portal setup via FedCloud OCCI and Puppet.
 
 dnl *** From gromacs-inputs.yaml.m4 take only macros, drop regular texts.
 divert(`-1')dnl
 include(scipion-inputs.yaml.m4)dnl
 divert(`0')dnl
 
+#define(_NODE_SERVER_,       ifdef(`_CFM_',`gromacs.nodes.MonitoredServer',`gromacs.nodes.Server'))dnl
+#define(_NODE_TORQUESERVER_, ifdef(`_CFM_',`gromacs.nodes.MonitoredTorqueServer',`gromacs.nodes.TorqueServer'))dnl
+#define(_NODE_WEBSERVER_,    ifdef(`_CFM_',`gromacs.nodes.MonitoredWebServer', `gromacs.nodes.WebServer'))dnl
+#define(_NODE_SWCOMPONENT_,  ifdef(`_CFM_',`gromacs.nodes.MonitoredSoftwareComponent', `gromacs.nodes.SoftwareComponent'))dnl
+define(_NODE_SERVER_,         ifdef(`_CFM_',`gromacs.nodes.MonitoredServer',`gromacs.nodes.Server'))dnl
+define(_NODE_HOSTPOOLSERVER_, ifdef(`_CFM_',`gromacs.nodes.MonitoredHostPoolServer',`gromacs.nodes.HostPoolServer'))dnl
+define(_NODE_TORQUESERVER_,   ifdef(`_CFM_',`gromacs.nodes.MonitoredTorqueServer',`gromacs.nodes.TorqueServer'))dnl
+define(_NODE_WEBSERVER_,      ifdef(`_CFM_',`gromacs.nodes.MonitoredWebServer', `gromacs.nodes.WebServer'))dnl
+define(_NODE_SWCOMPONENT_,    ifdef(`_CFM_',`gromacs.nodes.MonitoredSoftwareComponent', `gromacs.nodes.SoftwareComponent'))dnl
+define(_NAME_OLINNODE_,       ifelse(_PROVISIONER_,`hostpool',`olinNodeHostPool',`olinNode'))dnl
+define(_NAME_WORKERNODE_,     ifelse(_PROVISIONER_,`hostpool',`workerNodeHostPool',`workerNode'))dnl
+define(_NAME_TORQUESERVER_,   ifelse(_PROVISIONER_,`hostpool',`torqueServerHostPool',`torqueServer'))dnl
+
+# Note: plugin/version installation for CFM handled
+# in Makefile by target "cfm-plugins"
 imports:
-  - http://getcloudify.org/spec/cloudify/3.4/types.yaml
-#  - http://getcloudify.org/spec/fabric-plugin/1.3.1/plugin.yaml
-  - https://raw.githubusercontent.com/ICS-MU/westlife-cloudify-fabric-plugin/master/plugin.yaml
-  - http://getcloudify.org/spec/diamond-plugin/1.3.1/plugin.yaml
-  - https://raw.githubusercontent.com/ICS-MU/westlife-cloudify-occi-plugin/master/plugin.yaml
-#  - https://raw.githubusercontent.com/ICS-MU/westlife-cloudify-westlife-workflows/master/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/4.3/types.yaml
+  - http://www.getcloudify.org/spec/diamond-plugin/1.3.1/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-host-pool-plugin/1.5/plugin.yaml
+  - https://raw.githubusercontent.com/ICS-MU/westlife-cloudify-occi-plugin/0.0.15/plugin.yaml
+  - https://raw.githubusercontent.com/ICS-MU/westlife-cloudify-fabric-plugin/1.5.1.1/plugin.yaml
+  - https://raw.githubusercontent.com/ICS-MU/westlife-cloudify-westlife-workflows/master/plugin.yaml
   - types/puppet.yaml
   - types/server.yaml
   - types/softwarecomponent.yaml
@@ -50,39 +62,61 @@ inputs:
     default: False
     type: boolean
 
+  # Host pool
+  hostpool_service_url:
+    default: ''
+    type: string
+  hostpool_username:
+    default: 'root'
+    type: string
+  hostpool_private_key:
+    default: ''
+    type: string
+
   # contextualization
   cc_username:
     default: cfy
     type: string
   cc_public_key:
     type: string
-  cc_private_key_filename:
+  cc_private_key:
     type: string
   cc_data:
     default: {}
 
   # VM parameters
-  olin_os_tpl:
+  olin_occi_os_tpl:
     type: string
-  olin_resource_tpl:
+  olin_occi_resource_tpl:
     type: string
-  olin_availability_zone:
+  olin_occi_availability_zone:
     type: string
-  olin_scratch_size:
+  olin_occi_network:
+    type: string
+  olin_occi_network_pool:
+    type: string
+  olin_occi_scratch_size:
     type: integer
-  worker_os_tpl:
+  olin_hostpool_tags:
+    default: []
+  worker_occi_os_tpl:
     type: string
-  worker_resource_tpl:
+  worker_occi_resource_tpl:
     type: string
-  worker_availability_zone:
+  worker_occi_availability_zone:
     type: string
-  worker_scratch_size:
+  worker_occi_network:
+    type: string
+  worker_occi_network_pool:
+    type: string
+  worker_occi_scratch_size:
     type: integer
-
-  olin_vnc_password:
-    type: string
+  worker_hostpool_tags:
+    default: []
 
   # Application parameters
+  olin_vnc_password:
+    type: string
 
 dsl_definitions:
   occi_configuration: &occi_configuration
@@ -101,28 +135,53 @@ dsl_definitions:
 
   fabric_env: &fabric_env
     user: { get_input: cc_username }
-    key_filename: { get_input: cc_private_key_filename }
+    key: { get_input: cc_private_key }
+
+  fabric_env_hostpool: &fabric_env_hostpool
+    user: { get_input: hostpool_username }
+    key: { get_input: hostpool_private_key }
 
   agent_configuration: &agent_configuration
     install_method: remote
     user: { get_input: cc_username }
-    key: { get_input: cc_private_key_filename }
+    key: { get_input: cc_private_key }
+
+  agent_configuration_hostpool: &agent_configuration_hostpool
+    install_method: remote
+    user: { get_input: hostpool_username }
+    key: { get_input: hostpool_private_key }
 
   puppet_config: &puppet_config
-#    repo: 'https://yum.puppetlabs.com/puppetlabs-release-pc1-el-7.noarch.rpm'
-    repo: 'https://apt.puppetlabs.com/puppetlabs-release-pc1-trusty.deb'
+    repo: 'https://apt.puppetlabs.com/puppet5-release-trusty.deb'
     package: 'puppet-agent'
     download: resources/puppet.tar.gz
 
+  #TODO
+  plugin_resources: &plugin_resources
+    description: >
+      Holds any archives that should be uploaded to the manager.
+    default:
+      - 'https://github.com/ICS-MU/westlife-cloudify-occi-plugin/releases/download/0.0.14/cloudify_occi_plugin-0.0.14-py27-none-linux_x86_64.wgn'
+
 node_templates:
+
+ifelse(_PROVISIONER_,`hostpool',`
+  ### Predeployed nodes #######################################################
+
+',_PROVISIONER_,`occi',`
+  ### OCCI nodes #############################################################
+
+  # olin (frontend)
   olinNode:
     type: _NODE_SERVER_
     properties:
-      name: 'Scipion all-in-one server node'
+      name: "Scipion all-in-one server node"
       resource_config:
-        os_tpl: { get_input: olin_os_tpl }
-        resource_tpl: { get_input: olin_resource_tpl }
-        availability_zone: { get_input: olin_availability_zone }
+        os_tpl: { get_input: olin_occi_os_tpl }
+        resource_tpl: { get_input: olin_occi_resource_tpl }
+        availability_zone: { get_input: olin_occi_availability_zone }
+        network: { get_input: olin_occi_network }
+        network_pool: { get_input: olin_occi_network_pool }
       agent_config: *agent_configuration
       cloud_config: *cloud_configuration
       occi_config: *occi_configuration
@@ -131,21 +190,29 @@ node_templates:
   olinStorage:
     type: cloudify.occi.nodes.Volume
     properties:
-      size: { get_input: olin_scratch_size }
-      availability_zone: { get_input: olin_availability_zone }
+      size: { get_input: olin_occi_scratch_size }
+      availability_zone: { get_input: olin_occi_availability_zone }
       occi_config: *occi_configuration
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        delete:
+          inputs:
+            wait_finish: false
     relationships:
       - type: cloudify.occi.relationships.volume_contained_in_server
         target: olinNode
+        target_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            unlink:
+              inputs:
+                skip_action: true
 
   scipion:
     type: _NODE_WEBSERVER_
     instances:
       deploy: 1
     properties:
-      fabric_env:
-        <<: *fabric_env
-        host_string: { get_attribute: [olinNode, ip] }
+      fabric_env: *fabric_env
       puppet_config:
         <<: *puppet_config
         manifests:
@@ -154,7 +221,7 @@ node_templates:
           westlife::volume::device: /dev/vdc
           westlife::volume::fstype: ext4
           westlife::volume::mountpoint: /data
-          westlife::volume::mode: '1777'
+          westlife::volume::mode: "1777"
           westlife::vnc::password: { get_input: olin_vnc_password }
     relationships:
       - type: cloudify.relationships.contained_in
@@ -188,14 +255,13 @@ node_templates:
 #    relationships:
 #      - type: cloudify.relationships.contained_in
 #        target: workerNode
-
-
+',`errprint(Missing definition of _PROVISIONER_ in the inputs
+)m4exit(1)')
 
 outputs:
   web_endpoint:
     description: Scipion portal endpoint
-    value:
-      url: { concat: ['http://', { get_attribute: [olinNode, ip] },':8000'] }
+    value: { concat: ['http://', { get_attribute: [_NAME_OLINNODE_, ip] }, ':8000'] }
 #  worker_ip:
 #    description: Worker IP
 #    value:

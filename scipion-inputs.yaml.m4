@@ -1,3 +1,17 @@
+---
+
+define(SQ,')
+
+############################################
+# Provisioner
+#
+# Note: Uncomment one of the following provisioners
+# to choose between OCCI or Host-pool
+
+define(_PROVISIONER_, occi)dnl
+# define(_PROVISIONER_, hostpool)dnl
+
+
 ############################################
 # OCCI authentication options
 
@@ -24,58 +38,95 @@ occi_voms: True
 
 
 ############################################
+# Host-pool plugin options
+
+# Host-pool service endpoint
+hostpool_service_url: 'http://127.0.0.1:8080'
+
+# Host-pool nodes remote user
+hostpool_username: 'root'
+
+# Host-pool nodes remote user
+hostpool_private_key: | ifelse(_PROVISIONER_,`hostpool',`
+esyscmd(`/bin/bash -c 'SQ`set -o pipefail; cat resources/ssh_hostpool/id_rsa | sed -e "s/^/  /"'SQ)
+ifelse(sysval, `0', `', `m4exit(`1')')dnl
+',`')
+
+############################################
 # Contextualization
 
 # remote user for accessing the portal instances
 cc_username: 'cfy'
 
 # SSH public key for remote user
-cc_public_key: 'include(`resources/ssh_cfy/id_rsa.pub')'
+cc_public_key: |
+esyscmd(`/bin/bash -c 'SQ`set -o pipefail; cat resources/ssh_cfy/id_rsa.pub | sed -e "s/^/  /"'SQ)
+ifelse(sysval, `0', `', `m4exit(`1')')dnl
 
 # SSH private key (filename or inline) for remote user
-# TODO: better dettect CFM path
-cc_private_key_filename: 'ifdef(`_CFM_',`/opt/manager/resources/blueprints/_CFM_BLUEPRINT_/resources/ssh_cfy/id_rsa',`resources/ssh_cfy/id_rsa')'
-
+cc_private_key: |
+esyscmd(`/bin/bash -c 'SQ`set -o pipefail; cat resources/ssh_cfy/id_rsa | sed -e "s/^/  /"'SQ)
+ifelse(sysval, `0', `', `m4exit(`1')')dnl
 
 ############################################
 # Main node (portal, batch server) deployment parameters
 
 # OS template
-#olin_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
-#olin_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
-#olin_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_269'
-olin_os_tpl: 'uuid_gputestmc_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_269'
-#olin_os_tpl:  'uuid_gputestmc_egi_ubuntu_server_16_04_lts_cerit_sc_270'
+#olin_occi_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
+#olin_occi_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
+#olin_occi_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_268'
+olin_occi_os_tpl: 'uuid_enmr_egi_ubuntu_server_16_04_lts_cerit_sc_271'
+#olin_occi_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_269'
+#olin_occi_os_tpl: 'uuid_gputestmc_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_269'
+#olin_occi_os_tpl:  'uuid_gputestmc_egi_ubuntu_server_16_04_lts_cerit_sc_270'
 
 # sizing
-olin_resource_tpl: 'medium'
+olin_occi_resource_tpl: 'medium'
 
 # availability zone
-olin_availability_zone: 'uuid_fedcloud_cerit_sc_103'
+olin_occi_availability_zone: 'uuid_fedcloud_cerit_sc_103'
+
+# network
+olin_occi_network: ''
+
+# network pool
+olin_occi_network_pool: ''
 
 # scratch size (in GB)
-olin_scratch_size: 30
+olin_occi_scratch_size: 2
 
-#VNC password
-olin_vnc_password: 'Scipion4All'
+# list of filter tags for the Host-pool
+olin_hostpool_tags: ['olin']
+
+
 
 
 ############################################
 # Worker node deployment parameters
 
 # OS template
-#worker_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
-#worker_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
-worker_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_268'
+#worker_occi_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
+#worker_occi_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
+#worker_occi_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_268'
+worker_occi_os_tpl: 'uuid_enmr_egi_ubuntu_server_16_04_lts_cerit_sc_271'
 
 # sizing
-worker_resource_tpl: 'medium'
+worker_occi_resource_tpl: 'medium'
 
 # availability zone
-worker_availability_zone: 'uuid_fedcloud_cerit_sc_103'
+worker_occi_availability_zone: 'uuid_fedcloud_cerit_sc_103'
+
+# network
+worker_occi_network: ''
+
+# network pool
+worker_occi_network_pool: ''
 
 # scratch size (in GB)
-worker_scratch_size: 30
+worker_occi_scratch_size: 2
+
+# list of filter tags for the Host-pool
+worker_hostpool_tags: ['worker']
 
 
 ############################################
@@ -87,9 +138,16 @@ worker_scratch_size: 30
 #
 # In the m4 processed files, these parameters are hidden
 #
-define(_WORKERS_,       2)dnl	# initial workers count
+define(_WORKERS_,       1)dnl	# initial workers count
 define(_WORKERS_MIN_,   1)dnl	# minimum workers with autoscaling
 define(_WORKERS_MAX_,   3)dnl	# maximum workers with autoscaling
+
+
+############################################
+# Application
+
+#VNC password
+olin_vnc_password: 'Scipion4All'
 
 
 # vim: set syntax=yaml
