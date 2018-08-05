@@ -1,0 +1,11 @@
+[Unit]
+Description=websockify.service
+After=network.target
+
+[Service]
+#Type=forking
+ExecStart=/usr/local/bin/websockify <% if size($websockify::source_addr)>0 { %><%= $websockify::source_addr %><% } %> <%= $websockify::source_port %> <%= $websockify::target_addr %>:<%= $websockify::target_port %> --web /opt/novnc <% if $websockify::ssl_enabled { %>--cert /etc/letsencrypt/live/<%= $websockify::ssl_domains[0] %>/fullchain.pem --key /etc/letsencrypt/live/<%= $websockify::ssl_domains[0] %>/privkey.pem <% } %>
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

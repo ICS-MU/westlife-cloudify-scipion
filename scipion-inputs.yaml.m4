@@ -8,8 +8,8 @@ define(SQ,')
 # Note: Uncomment one of the following provisioners
 # to choose between OCCI or Host-pool
 
-define(_PROVISIONER_, occi)dnl
-# define(_PROVISIONER_, hostpool)dnl
+# define(_PROVISIONER_, occi)dnl
+define(_PROVISIONER_, hostpool)dnl
 
 
 ############################################
@@ -146,8 +146,17 @@ define(_WORKERS_MAX_,   3)dnl	# maximum workers with autoscaling
 ############################################
 # Application
 
-#VNC password
+# VNC password
 olin_vnc_password: 'Scipion4All'
 
+# version of CUDA Toolkit deployed on GPU workers
+cuda_release: '8.0'
+
+# enable SSL secured access to the VNC secured by Let's Encrypt
+websockify_ssl_enabled: true  # if True, setup valid admin e-mail below
+
+# your valid contact e-mail address
+#websockify_ssl_email: 'root@localhost'
+websockify_ssl_email: 'holer@ics.muni.cz'
 
 # vim: set syntax=yaml

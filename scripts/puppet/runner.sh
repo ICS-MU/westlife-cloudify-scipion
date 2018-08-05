@@ -32,7 +32,7 @@ function pkg_ipv4() {
             echo 'ip_resolve=4' | sudo -n tee -a /etc/yum.conf
         fi
     elif [ -n "${IS_APT}" ]; then
-        if ! apt-config dump | grep Acquire::ForceIPv4; then
+        if ! apt-config dump | grep -q Acquire::ForceIPv4; then
             echo 'Acquire::ForceIPv4 "true";' | sudo -n tee -a /etc/apt/apt.conf.d/99force-ipv4
         fi
     fi
@@ -87,6 +87,10 @@ function install_puppet_agent() {
                     break
                 done
                 unlink ${PC_REPO_PKG}
+
+                # Debian has a very bad habit to enable installed services
+                systemctl stop puppet mcollective || /bin/true
+                systemctl disable puppet mcollective || /bin/true
             fi
         else
             ctx logger warning 'Puppet: missing repository package'

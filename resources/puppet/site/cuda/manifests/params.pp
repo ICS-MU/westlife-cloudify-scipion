@@ -1,4 +1,5 @@
 class cuda::params {
+  $ensure = present
   $repo_manage = true
   $repo_rooturl = 'http://developer.download.nvidia.com/compute/cuda/repos'
   $repo_gpgkey_id = 'F60F4B3D7FA2AF80'

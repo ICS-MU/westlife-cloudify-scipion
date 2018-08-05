@@ -1,3 +1,9 @@
+$_ensure = $facts['cloudify_ctx_operation_name'] ? {
+  delete  => absent,
+  stop    => absent,
+  default => present,
+}
+
 # clean firewall rules
 resources { 'firewall':
   purge => true,
@@ -9,52 +15,39 @@ include ::westlife::volume
 #include ::archive
 
 
-$onedataurl = 'http://get.onedata.org/oneclient.sh'
-
-
-#letsencrypt
-
-class { '::letsencrypt':
-        email               => 'pesa@ics.muni.cz',
-        unsafe_registration => true,
-      }
-
-letsencrypt::certonly { $fqdn:
-        plugin               => 'standalone',
-        manage_cron          => true,
-        cron_before_command  => '/bin/systemctl stop websockify.service',
-        cron_success_command => '/bin/systemctl restart websockify.service',
-        suppress_cron_output => true,
-        before               => Class['websockify'],
-      }
-
+#$onedataurl = 'http://get.onedata.org/oneclient.sh'
 
 
 # CUDA runtime
-kmod::load { 'nouveau':
-  ensure => absent,
-}
+# setup CUDA only if release specified
+$cuda_release = lookup('cuda::release')
+if (length("${cuda_release}")>0) { #and ($facts['has_nvidia_gpu']==true) {
+  kmod::load { 'nouveau':
+    ensure => absent,
+  }
 
-class {'cuda':
-  release         => '8.0',
-  install_toolkit => false,
-  require         => Kmod::Load['nouveau'],
-}
+  class {'cuda':
+    ensure          => $_ensure,
+    install_toolkit => false,
+    require         => Kmod::Load['nouveau'],
+  }
 
-exec { 'nvidia-xconfig':
-  command => '/usr/bin/nvidia-xconfig -a --use-display-device=None --virtual=1920x1200 --preserve-busid',
-  unless  => '/bin/grep nvidia /etc/X11/xorg.conf',
-  require => Class['cuda'],
+  exec { 'nvidia-xconfig':
+    command => '/usr/bin/nvidia-xconfig -a --use-display-device=None --virtual=1920x1200 --preserve-busid',
+    unless  => '/bin/grep nvidia /etc/X11/xorg.conf',
+    require => Class['cuda'],
+  }
 }
 
 # X environment
 ensure_packages(['lightdm', 'xfce4', 'xterm', 'mesa-utils'])
 
 class { 'turbovnc':
-  passwords => { 'cfy' => lookup('westlife::vnc::password') },
+  ensure    => $_ensure,
+  passwords => { 'scipion' => lookup('westlife::vnc::password') },
   servers   => {
     1 => {
-      'user' => 'cfy',
+      'user' => 'scipion',
       'args' => '-geometry 1024x768 -nohttpd',
 #      'args' => '-geometry 1024x768 -nohttpd -xstartup openbox',
     },
@@ -126,14 +119,27 @@ nfs::server::export{ '/opt':
 }
 
 class {'scipion':
+  ensure => $_ensure,
 }
 
 ##############################################################
 # Download Onedata client
+
 class {'onedata':
+  ensure => $_ensure,
 }
 
 #############################################################
 #Install websockify&novnc
+
+class { 'novnc':
+  ensure => $_ensure,
+}
+
 class {'websockify':
+  ensure      => $_ensure,
+  source_port => 8000,
+  target_addr => 'localhost',
+  target_port => 5901,
+  require     => Class['novnc'],
 }

@@ -1,21 +1,29 @@
 class virtualgl::install {
+  $_ensure_dir = $virtualgl::ensure ? {
+    present => directory,
+    default => absent,
+  }
+
   file { '/tmp/.virtualgl':
-    ensure  => directory,
+    ensure  => $_ensure_dir,
     purge   => true,
     recurse => true,
+    force   => true,
     mode    => '0700',
   }
 
-  archive { '/tmp/.virtualgl/virtualgl':
-    source  => $virtualgl::_package,
-    extract => false,
-    require => File['/tmp/.virtualgl'],
+  if ($virtualgl::ensure == 'present') {
+    archive { '/tmp/.virtualgl/virtualgl':
+      source  => $virtualgl::_package,
+      extract => false,
+      require => File['/tmp/.virtualgl'],
+      before  => Package[$virtualgl::package],
+    }
   }
 
   package { $virtualgl::package:
-    ensure   => present,
+    ensure   => $virtualgl::ensure,
     source   => '/tmp/.virtualgl/virtualgl',
-    require  => Archive['/tmp/.virtualgl/virtualgl'],
     provider => $virtualgl::package_provider,
   }
 }

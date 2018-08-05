@@ -1,4 +1,5 @@
 class turbovnc (
+  $ensure           = $turbovnc::params::ensure,
   $version          = $turbovnc::params::version,
   $package          = $turbovnc::params::package,
   $package_url_base = $turbovnc::params::package_url_base,
@@ -12,6 +13,10 @@ class turbovnc (
 
   $_package = inline_template("${package_url_base}${package_url_name}")
 
+  class { 'virtualgl':
+    ensure => $ensure,
+  }
+
   require java
   require virtualgl
 
@@ -19,16 +24,31 @@ class turbovnc (
   contain turbovnc::config
   contain turbovnc::service
 
-  Class['turbovnc::install']
-    -> Class['turbovnc::config']
-    ~> Class['turbovnc::service']
+  case $ensure {
+    present: {
+      Class['turbovnc::install']
+        -> Class['turbovnc::config']
+        ~> Class['turbovnc::service']
 
-  $passwords.each |String $user, String $password| {
-    turbovnc::password { $user:
-      password => $password,
+      $passwords.each |String $user, String $password| {
+        turbovnc::password { $user:
+          password => $password,
+        }
+
+        turbovnc::xstartup { $user:
+          password => $password,
+        }
+      }
     }
-  turbovnc::xstartup { $user:
-      password => $password,
+
+    absent: {
+      Class['turbovnc::service']
+        -> Class['turbovnc::config']
+        -> Class['turbovnc::install']
+    }
+
+    default: {
+      fail("Invalid ensure state: ${ensure}")
     }
   }
 }

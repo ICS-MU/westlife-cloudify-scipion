@@ -117,6 +117,12 @@ inputs:
   # Application parameters
   olin_vnc_password:
     type: string
+  cuda_release:
+    type: string
+  websockify_ssl_enabled:
+    type: boolean
+  websockify_ssl_email:
+    type: string
 
 dsl_definitions:
   occi_configuration: &occi_configuration
@@ -167,6 +173,40 @@ node_templates:
 
 ifelse(_PROVISIONER_,`hostpool',`
   ### Predeployed nodes #######################################################
+
+  # predeployed olin (frontend)
+  olinNodeHostPool:
+    type: _NODE_HOSTPOOLSERVER_
+    properties:
+      agent_config: *agent_configuration_hostpool
+      fabric_env: *fabric_env_hostpool
+      hostpool_service_url: { get_input: hostpool_service_url }
+      filters:
+        tags: { get_input: olin_hostpool_tags }
+
+  scipionHostPool:
+    type: _NODE_WEBSERVER_
+    instances:
+      deploy: 1
+    properties:
+      fabric_env: *fabric_env_hostpool
+      puppet_config:
+        <<: *puppet_config
+        manifests:
+          start: manifests/scipion_olin.pp
+          delete: manifests/scipion_olin.pp
+        hiera:
+          westlife::volume::device: /dev/vdc
+          westlife::volume::fstype: ext4
+          westlife::volume::mountpoint: /data
+          westlife::volume::mode: "1777"
+          westlife::vnc::password: { get_input: olin_vnc_password }
+          cuda::release: { get_input: cuda_release }
+          websockify::ssl_enabled: { get_input: websockify_ssl_enabled }
+          websockify::ssl_email: { get_input: websockify_ssl_email }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: olinNodeHostPool
 
 ',_PROVISIONER_,`occi',`
   ### OCCI nodes #############################################################
@@ -223,6 +263,9 @@ ifelse(_PROVISIONER_,`hostpool',`
           westlife::volume::mountpoint: /data
           westlife::volume::mode: "1777"
           westlife::vnc::password: { get_input: olin_vnc_password }
+          cuda::release: { get_input: cuda_release }
+          websockify::ssl_enabled: { get_input: websockify_ssl_enabled }
+          websockify::ssl_email: { get_input: websockify_ssl_email }
     relationships:
       - type: cloudify.relationships.contained_in
         target: olinNode

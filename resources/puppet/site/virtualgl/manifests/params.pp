@@ -1,4 +1,5 @@
 class virtualgl::params {
+  $ensure = present
   $version = '2.5.2'
   $package = 'virtualgl'
   $package_url_base = 'https://sourceforge.net/projects/virtualgl/files/<%= @version %>/'

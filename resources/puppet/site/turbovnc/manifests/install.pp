@@ -1,24 +1,35 @@
 class turbovnc::install {
+  $_ensure_dir = $turbovnc::ensure ? {
+    present => directory,
+    default => absent,
+  }
+
   file { '/tmp/.turbovnc':
-    ensure  => directory,
+    ensure  => $_ensure_dir,
     purge   => true,
     recurse => true,
+    force   => true,
     mode    => '0700',
   }
 
-  archive { '/tmp/.turbovnc/turbovnc':
-    source  => $turbovnc::_package,
-    extract => false,
-    require => File['/tmp/.turbovnc'],
+  if ($turbovnc::ensure == 'present') {
+    archive { '/tmp/.turbovnc/turbovnc':
+      source  => $turbovnc::_package,
+      extract => false,
+      require => File['/tmp/.turbovnc'],
+      before  => Package[$turbovnc::package],
+    }
   }
 
   package { $turbovnc::package:
-    ensure   => present,
+    ensure   => $turbovnc::ensure,
     source   => '/tmp/.turbovnc/turbovnc',
-    require  => Archive['/tmp/.turbovnc/turbovnc'],
     provider => $turbovnc::package_provider,
   }
 
   # install other packages
-  ensure_packages($turbovnc::packages_xorg)
+  ensure_packages(
+    $turbovnc::packages_xorg,
+    { 'ensure' => $turbovnc::ensure }
+  )
 }

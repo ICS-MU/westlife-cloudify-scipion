@@ -1,32 +1,36 @@
-class websockify {
+class websockify (
+  String  $ensure               = $websockify::params::ensure,
+  Boolean $ssl_enabled          = $websockify::params::ssl_enabled,
+  String  $ssl_email            = $websockify::params::ssl_email,
+  Array[String, 1] $ssl_domains = $websockify::params::ssl_domains,
+  Optional[String] $source_addr = $websockify::params::source_addr,
+  Integer $source_port          = $websockify::params::source_port,
+  String $target_addr           = $websockify::params::target_addr,
+  Integer $target_port          = $websockify::params::target_port
+) inherits websockify::params {
 
-vcsrepo { "/opt/novnc/":
-  ensure    => present,
-  provider  => git,
-  source    =>'https://github.com/novnc/noVNC',
-  depth     => '1',
-  before => Service['websockify'],
-}
-exec {'websockify_install':
-  command     => "pip install websockify",
-  path        => '/usr/bin',
-  before => Service['websockify'],
-}
+  contain websockify::install
+  contain websockify::config
+  contain websockify::service
 
-exec { 'fqdnfile':
-  command => "/bin/echo FQDN=$(/bin/hostname -f) > /opt/fqdnvar.txt",
-  before => Service['websockify'],
-}
+  case $ensure {
+    present: {
+      Class['websockify::install']
+        -> Class['websockify::config']
+        ~> Class['websockify::service']
 
-file {'/etc/systemd/system/websockify.service':
-	ensure => present,
-	source => 'puppet:///modules/websockify/websockify.service',
-  before => Service['websockify'],
-}
+      Class['websockify::install']
+        ~> Class['websockify::service']
+    }
 
-service {'websockify':
-  ensure => 'running',
-  enable => 'true',
-}
+    absent: {
+      Class['websockify::service']
+        -> Class['websockify::config']
+        -> Class['websockify::install']
+    }
 
+    default: {
+      fail("Invalid ensure state: ${ensure}")
+    }
+  }
 }

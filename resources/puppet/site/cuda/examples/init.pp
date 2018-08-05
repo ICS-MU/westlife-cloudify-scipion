@@ -1,3 +1,3 @@
-class { '::cuda':
+class { 'cuda':
   release => '8.0',
 }
