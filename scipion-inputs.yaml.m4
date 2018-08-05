@@ -8,8 +8,8 @@ define(SQ,')
 # Note: Uncomment one of the following provisioners
 # to choose between OCCI or Host-pool
 
-# define(_PROVISIONER_, occi)dnl
-define(_PROVISIONER_, hostpool)dnl
+define(_PROVISIONER_, occi)dnl
+# define(_PROVISIONER_, hostpool)dnl
 
 
 ############################################
