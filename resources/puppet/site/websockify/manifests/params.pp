@@ -5,6 +5,7 @@ class websockify::params {
   $ssl_domains = [ $facts['networking']['fqdn'] ]
 
   # daemon
+  $binary = '/usr/local/bin/websockify'
   $web = undef
   $source_addr = undef
   $source_port = undef

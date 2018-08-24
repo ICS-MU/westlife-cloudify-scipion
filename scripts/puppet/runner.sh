@@ -29,11 +29,11 @@ ctx_node_properties() {
 function pkg_ipv4() {
     if [ -n "${IS_YUM}" ]; then
         if ! grep -q ip_resolve /etc/yum.conf; then
-            echo 'ip_resolve=4' | sudo -n tee -a /etc/yum.conf
+            echo 'ip_resolve=4' | sudo -n tee -a /etc/yum.conf >/dev/null
         fi
     elif [ -n "${IS_APT}" ]; then
         if ! apt-config dump | grep -q Acquire::ForceIPv4; then
-            echo 'Acquire::ForceIPv4 "true";' | sudo -n tee -a /etc/apt/apt.conf.d/99force-ipv4
+            echo 'Acquire::ForceIPv4 "true";' | sudo -n tee -a /etc/apt/apt.conf.d/99force-ipv4 >/dev/null
         fi
     fi
 }
@@ -41,15 +41,27 @@ function pkg_ipv4() {
 # install python
 function install_python() {
     if ! python --version &>/dev/null; then
+        local STATUS=1
+
         if [ -n "${IS_YUM}" ]; then
             sudo -n yum -yq install python
+            STATUS=$?
         elif [ -n "${IS_APT}" ]; then
             for i in {1..10}; do
-                sudo -n apt-get -y update >/dev/null
-                sudo -n apt-get -y install python >/dev/null && break
-                sleep 6
+                [ $i -ne 1 ] && sleep 5
+
+                sudo -n apt-get -y update >/dev/null || continue
+                sudo -n apt-get -y install python >/dev/null || continue
+
+                STATUS=0
+                break
             done
         fi
+
+        if [ $STATUS -ne 0 ]; then
+            ctx logger error 'Failed to install Python'
+            exit 1
+        fi          
 
         ctx logger info 'Python installed'
     fi
@@ -58,14 +70,29 @@ function install_python() {
 # install jq
 function install_jq() {
     if ! jq --version &>/dev/null; then
+        local STATUS=1
+
         if [ -n "${IS_YUM}" ]; then
             sudo -n yum -yq install jq
+            STATUS=$?
         elif [ -n "${IS_APT}" ]; then
             for i in {1..10}; do
-                sudo -n apt-get -y install jq >/dev/null && break
-                sleep 6
+                [ $i -ne 1 ] && sleep 5
+
+                sudo -n apt-get -y update >/dev/null || continue
+                sudo -n apt-get -y install jq >/dev/null || continue
+
+                STATUS=0
+                break
             done
         fi
+
+        if [ $STATUS -ne 0 ]; then
+            ctx logger error 'Failed to install jq'
+            exit 1
+        fi
+
+        ctx logger info 'jq installed'
     fi
 }
 
@@ -75,40 +102,65 @@ function install_puppet_agent() {
         ctx logger info 'Puppet: installing Puppet Agent'
         PC_REPO=$(ctx_node_properties 'puppet_config.repo')
         if [ "x${PC_REPO}" != 'x' ]; then
+            local STATUS=1
+
             if [ -n "${IS_YUM}" ]; then
                 sudo -n rpm -i "${PC_REPO}" 
+                STATUS=$?
             elif [ -n "${IS_APT}" ]; then
                 local PC_REPO_PKG=$(mktemp)
                 wget -O "${PC_REPO_PKG}" "${PC_REPO}"
                 for i in {1..10}; do
-                    sleep 6
-                    sudo -n dpkg -i ${PC_REPO_PKG} || continue
+                    [ $i -ne 1 ] &&  sleep 5
+
+                    sudo -n dpkg -i ${PC_REPO_PKG} >/dev/null || continue
                     sudo -n apt-get -qq update || continue
+
+                    STATUS=0
                     break
                 done
                 unlink ${PC_REPO_PKG}
-
-                # Debian has a very bad habit to enable installed services
-                systemctl stop puppet mcollective || /bin/true
-                systemctl disable puppet mcollective || /bin/true
             fi
+
+            if [ $STATUS -ne 0 ]; then
+                ctx logger error 'Puppet: failed to install repository package'
+                exit 1
+            fi          
         else
             ctx logger warning 'Puppet: missing repository package'
         fi
 
         PC_PACKAGE=$(ctx_node_properties 'puppet_config.package')
         if [ "x${PC_PACKAGE}" != 'x' ]; then
+            local STATUS=1
+
             if [ -n "${IS_YUM}" ]; then
                 sudo -n yum -y -q install "${PC_PACKAGE}"
+                STATUS=$?
             elif [ -n "${IS_APT}" ]; then 
                 for i in {1..10}; do
-                    sudo -n apt-get -y install "${PC_PACKAGE}" >/dev/null
-                    sleep 6
+                    [ $i -ne 1 ] && sleep 5
+
+                    sudo -n apt-get -y update >/dev/null || continue
+                    sudo -n apt-get -y install "${PC_PACKAGE}" >/dev/null || continue
+
+                    STATUS=0
+                    break
                 done
+
+                if [ $STATUS -ne 0 ]; then
+                    ctx logger error 'Puppet: failed to install agent'
+                    exit 1
+                fi          
+
+                # Debian has a very bad habit to enable installed services
+                systemctl stop puppet mcollective || /bin/true
+                systemctl disable puppet mcollective || /bin/true
             fi
         else
             ctx logger error 'Puppet: missing Puppet package name'
         fi
+
         ctx logger info 'Puppet: installing Puppet Agent ... done'
     fi
 

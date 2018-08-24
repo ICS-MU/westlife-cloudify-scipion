@@ -22,11 +22,25 @@ class scipion::install {
         extract_path => '/opt/',
         creates      => '/opt/scipion/scipion',
         require      => File['/tmp/.scipion'],
-        before       => File['/opt/scipion'],
+        notify       => Exec['chown-scipion'],
+      }
+
+      exec { 'chown-scipion':
+        command     => "chown -R ${scipion::user::user_name}:${scipion::user::group_name} /opt/scipion",
+        path        => '/bin:/usr/bin:/sbin:/usr/sbin',
+        refreshonly => true,
       }
     }
 
     absent: {
+      file { '/opt/scipion':
+        ensure  => $_ensure_dir,
+        owner   => $scipion::user::user_name,
+        group   => $scipion::user::group_name,
+        force   => true,
+        backup  => false,
+        recurse => true,
+      }
     }
 
     default: {
@@ -34,12 +48,4 @@ class scipion::install {
     }
   }
 
-  file { '/opt/scipion':
-    ensure  => $_ensure_dir,
-    owner   => $scipion::user::user_name,
-    group   => $scipion::user::group_name,
-    force   => true,
-    backup  => false,
-    recurse => true,
-  }
 }

@@ -9,11 +9,8 @@ resources { 'firewall':
   purge => true,
 }
 
-include ::firewall
-include wget
-include ::westlife::volume
-#include ::archive
-
+include firewall
+include westlife::volume
 
 #$onedataurl = 'http://get.onedata.org/oneclient.sh'
 
@@ -21,7 +18,7 @@ include ::westlife::volume
 # CUDA runtime
 # setup CUDA only if release specified
 $cuda_release = lookup('cuda::release')
-if (length("${cuda_release}")>0) { #and ($facts['has_nvidia_gpu']==true) {
+if (length("${cuda_release}")>0) and ($facts['has_nvidia_gpu']==true) {
   kmod::load { 'nouveau':
     ensure => absent,
   }
@@ -118,7 +115,7 @@ nfs::server::export{ '/opt':
   clients => '(rw,sync,no_root_squash,no_subtree_check)'
 }
 
-class {'scipion':
+class { 'scipion':
   ensure => $_ensure,
 }
 
@@ -130,7 +127,7 @@ class {'onedata':
 }
 
 #############################################################
-#Install websockify&novnc
+# Install websockify&novnc
 
 class { 'novnc':
   ensure => $_ensure,
@@ -141,5 +138,6 @@ class {'websockify':
   source_port => 8000,
   target_addr => 'localhost',
   target_port => 5901,
+  web         => '/opt/novnc',
   require     => Class['novnc'],
 }

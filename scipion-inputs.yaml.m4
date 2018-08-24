@@ -156,7 +156,6 @@ cuda_release: '8.0'
 websockify_ssl_enabled: true  # if True, setup valid admin e-mail below
 
 # your valid contact e-mail address
-#websockify_ssl_email: 'root@localhost'
-websockify_ssl_email: 'holer@ics.muni.cz'
+websockify_ssl_email: 'root@localhost'
 
 # vim: set syntax=yaml
