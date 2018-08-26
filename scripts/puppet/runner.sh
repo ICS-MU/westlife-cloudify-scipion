@@ -154,8 +154,8 @@ function install_puppet_agent() {
                 fi          
 
                 # Debian has a very bad habit to enable installed services
-                systemctl stop puppet mcollective || /bin/true
-                systemctl disable puppet mcollective || /bin/true
+                sudo -n systemctl stop puppet mcollective || /bin/true
+                sudo -n systemctl disable puppet mcollective || /bin/true
             fi
         else
             ctx logger error 'Puppet: missing Puppet package name'
