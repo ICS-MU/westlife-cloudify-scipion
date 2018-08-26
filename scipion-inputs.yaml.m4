@@ -153,7 +153,7 @@ olin_vnc_password: 'Scipion4All'
 cuda_release: '8.0'
 
 # enable SSL secured access to the VNC secured by Let's Encrypt
-websockify_ssl_enabled: true  # if True, setup valid admin e-mail below
+websockify_ssl_enabled: False  # if True, setup valid admin e-mail below
 
 # your valid contact e-mail address
 websockify_ssl_email: 'root@localhost'

@@ -7,7 +7,7 @@ class websockify (
   Integer $source_port          = $websockify::params::source_port,
   String $target_addr           = $websockify::params::target_addr,
   Integer $target_port          = $websockify::params::target_port,
-  Optional[String, 1] $web      = $websockify::params::web,
+  Optional[String] $web         = $websockify::params::web,
   String $binary                = $websockify::params::binary
 ) inherits websockify::params {
 
