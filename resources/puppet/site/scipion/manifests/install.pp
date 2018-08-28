@@ -35,8 +35,9 @@ class scipion::install {
     absent: {
       file { '/opt/scipion':
         ensure  => $_ensure_dir,
-        owner   => $scipion::user::user_name,
-        group   => $scipion::user::group_name,
+#dependency cycle
+#        owner   => $scipion::user::user_name,
+#        group   => $scipion::user::group_name,
         force   => true,
         backup  => false,
         recurse => true,

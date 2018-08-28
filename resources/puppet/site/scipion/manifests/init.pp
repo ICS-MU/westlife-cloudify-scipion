@@ -23,9 +23,12 @@ class scipion (
     }
 
     absent: {
+      Class['scipion::install']
+        -> Class['scipion::user']
     }
 
     default: {
+      fail("Unsupported ensure state: ${ensure}")
     }
   }
 }

@@ -9,6 +9,11 @@ resources { 'firewall':
   purge => true,
 }
 
+Package {
+  require => Class['apt::update'],
+}
+
+include apt
 include firewall
 include westlife::volume
 
@@ -64,25 +69,32 @@ file {'10-xhost.conf':
 # add repository
 # sudo add-apt-repository ppa:openjdk-r/ppa
 #apt::ppa { 'ppa:openjdk-r/ppa': }
+#
+#exec {'add-apt-repository':
+#  command => 'sudo add-apt-repository ppa:openjdk-r/ppa',
+#  path    => '/usr/bin/',
+#}
+#
+#exec { 'apt-get-update':
+#  command => "/usr/bin/apt-get update",
+#  require => Exec['add-apt-repository'],
+#}
 
-exec {'add-apt-repository':
-  command => 'sudo add-apt-repository ppa:openjdk-r/ppa',
-  path    => '/usr/bin/',
-}
-
-exec { 'apt-get-update':
-  command => "/usr/bin/apt-get update",
-  require => Exec['add-apt-repository'],
+apt::ppa { 'ppa:openjdk-r/ppa':
+  ensure => $_ensure,
 }
 
 # openjdk-8-jdk
 package { ['libopenmpi-dev','openmpi-bin','gfortran','cmake']:
-  ensure => present,
-  require => Exec['apt-get-update'],
+  ensure => $_ensure,
+  #require => Exec['apt-get-update'],
+  require => Apt::Ppa['ppa:openjdk-r/ppa'],
 }
+
 package { ['tk-dev','python-pip']:
-  ensure => present,
-  require => Exec['apt-get-update'],
+  ensure => $_ensure,
+  #require => Exec['apt-get-update'],
+  require => Apt::Ppa['ppa:openjdk-r/ppa'],
 }
 
 
@@ -118,6 +130,13 @@ nfs::server::export{ '/opt':
 class { 'scipion':
   ensure => $_ensure,
 }
+
+if $_ensure == present {
+  Class['scipion'] -> Class['turbovnc']
+} else {
+  Class['turbovnc'] -> Class['scipion']
+}
+
 
 ##############################################################
 # Download Onedata client
