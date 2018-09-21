@@ -17,13 +17,10 @@ include apt
 include firewall
 include westlife::volume
 
-#$onedataurl = 'http://get.onedata.org/oneclient.sh'
-
-
 # CUDA runtime
 # setup CUDA only if release specified
 $cuda_release = lookup('cuda::release')
-if (length("${cuda_release}")>0) and ($facts['has_nvidia_gpu']==true) {
+if (length("${cuda_release}")>0) {        ## and ($facts['has_nvidia_gpu']==true) {
   kmod::load { 'nouveau':
     ensure => absent,
   }
@@ -152,7 +149,7 @@ class { 'novnc':
   ensure => $_ensure,
 }
 
-class {'websockify':
+class { 'websockify':
   ensure      => $_ensure,
   source_port => 8000,
   target_addr => 'localhost',

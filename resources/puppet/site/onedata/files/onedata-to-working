@@ -1,0 +1,75 @@
+#! /bin/bash
+
+# Set configuration variables
+source sync-onedata-working.conf
+
+# Parameter checks
+if [ ! -d "$ONEDATA_DIRECTORY" ]
+then
+	echo "Directory $ONEDATA_DIRECTORY doesn't exist. Exitting."
+	exit 1
+fi
+
+if [ ! -d "$WORKING_DIRECTORY" ]
+then
+	echo "Directory $WORKING_DIRECTORY doesn't exist. Exitting."
+	exit 1
+fi
+
+
+# Check if it is the very first deployment of this OneData directory
+if [ -e "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME" ] 
+then
+	echo OneData directory "$ONEDATA_DIRECTORY" has already been deployed.
+	echo It is locked with "$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME".
+	echo Check its contents for details.
+	echo Cannot deploy it again.
+	exit 1
+fi
+
+# To business now.
+
+# Lock the onedata repo as it is to be deployed now
+mkdir -p "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY"
+echo "This folder was deployed on machine `hostname`" \
+	>  "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
+echo "`uname -a`" >> "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
+echo "From $ONEDATA_DIRECTORY" \
+	>>  "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
+echo "To $WORKING_DIRECTORY" \
+	>>  "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
+echo "by `whoami`" >> "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
+echo "on `date`" >> "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
+
+# Sync the data from OneData to the working directory
+# Note: --group is not supported by OneData
+rsync --recursive --perms --times --delete \
+	--verbose \
+	"$ONEDATA_DIRECTORY/" "$WORKING_DIRECTORY/"
+
+# If there are links to restore, do so
+if [ ! -f "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LINKFILENAME" ]
+then
+	echo Warning: "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LINKFILENAME is missing."
+else
+	# Restore symlinks
+	L=0
+	while read WHERE FILE LINKNAME REST_OF_LINE
+	do
+		L=$(($L+1))
+		if [ ! -z "$REST_OF_LINE" ]
+		then
+		echo "Warning: file $ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LINKFILENAME is broken, unexpected format on line $L"
+		fi
+
+		# Remove leading and trailing quote marks
+		WHERE="${WHERE%\"}"; WHERE="${WHERE#\"}"
+		FILE="${FILE%\"}"; FILE="${FILE#\"}"
+		LINKNAME="${LINKNAME%\"}"; LINKNAME="${LINKNAME#\"}"
+
+		# Create the link
+		echo Restoring link "$LINKNAME to $FILE in $WHERE"
+		(cd "$WHERE" && ln -s "$LINKNAME" "$FILE")
+	done < "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LINKFILENAME"
+fi
+

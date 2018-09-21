@@ -123,6 +123,14 @@ inputs:
     type: boolean
   websockify_ssl_email:
     type: string
+  onedata_version:
+    type: string
+  onedata_host:
+    type: string
+  onedata_token:
+    type: string
+  onedata_workspace:
+    type: string
 
 dsl_definitions:
   occi_configuration: &occi_configuration
@@ -204,6 +212,10 @@ ifelse(_PROVISIONER_,`hostpool',`
           cuda::release: { get_input: cuda_release }
           websockify::ssl_enabled: { get_input: websockify_ssl_enabled }
           websockify::ssl_email: { get_input: websockify_ssl_email }
+          onedata::version: { get_input: onedata_version }
+          onedata::host: { get_input: onedata_host }
+          onedata::token: { get_input: onedata_token }
+          onedata::workspace: { get_input: onedata_workspace }
     relationships:
       - type: cloudify.relationships.contained_in
         target: olinNodeHostPool
@@ -266,6 +278,10 @@ ifelse(_PROVISIONER_,`hostpool',`
           cuda::release: { get_input: cuda_release }
           websockify::ssl_enabled: { get_input: websockify_ssl_enabled }
           websockify::ssl_email: { get_input: websockify_ssl_email }
+          onedata::version: { get_input: onedata_version }
+          onedata::host: { get_input: onedata_host }
+          onedata::token: { get_input: onedata_token }
+          onedata::workspace: { get_input: onedata_workspace }
     relationships:
       - type: cloudify.relationships.contained_in
         target: olinNode

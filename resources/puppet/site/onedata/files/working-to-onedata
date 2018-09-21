@@ -1,0 +1,25 @@
+#! /bin/bash
+# Sync the working directory to OneData.
+
+# Set configuration variables
+source sync-onedata-working.conf
+
+if [ ! -e "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME" ]
+then
+	echo "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME is missing."
+	echo "The directory has probably never been deployed."
+	echo "No action will be taken here, exitting."
+	exit 1
+fi
+
+# Collect symlinks
+find "$WORKING_DIRECTORY/" -type l \
+	-printf "\"%h\" \"%f\" \"%l\"\n" \
+	 > "$WORKING_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LINKFILENAME"
+
+# Sync data from working directory to OneData, ignoring symlinks for now
+# Note: --group is not supported by OneData
+rsync --recursive --perms --times --delete \
+	--verbose \
+	$WORKING_DIRECTORY/ $ONEDATA_DIRECTORY/
+

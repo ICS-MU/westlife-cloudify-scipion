@@ -1,39 +1,45 @@
 class onedata::install {
   $_ensure_dir = $onedata::ensure ? {
     present => directory,
-    default => absent,
+    default => $onedata::ensure
   }
 
-  file { '/tmp/.onedata':
-    ensure  => $_ensure_dir,
-    purge   => true,
-    recurse => true,
+  $_ensure_pkg = $onedata::ensure ? {
+    present => $onedata::version,
+    default => $onedata::ensure,
+  }
+
+  package { $onedata::package:
+    ensure => $_ensure_pkg,
+  }
+
+  # scratch dir
+  file { $onedata::sync_scratch_dir:
+    ensure  => directory,
     force   => true,
-    mode    => '0700',
+    backup  => false,
+    recurse => true,
   }
 
-  case $onedata::ensure {
-    present: {
-      archive { '/tmp/.onedata/oneclient.sh':
-        source  => $onedata::installer_url,
-        extract => false,
-        require => File['/tmp/.onedata'],
-      }
+  # synchronization scripts
+  file { $onedata::sync_scripts_dir:
+    ensure  => $_ensure_dir,
+    force   => true,
+    backup  => false,
+    recurse => true,
+    mode    => '0755',
+  }
 
-      exec { 'onedata::install':
-        command => '/bin/sh /tmp/.onedata/oneclient.sh',
-        creates => '/opt/oneclient/bin/oneclient',
-      }
+  if $onedata::ensure == 'present' {
+    File[$onedata::sync_scripts_dir] {
+      source       => 'puppet:///modules/onedata',
+      sourceselect => all,
     }
 
-    absent: {
-      package { $onedata::package:
-        ensure => $onedata::ensure,
-      }
-    }
-
-    default: {
-      fail("Invalid ensure state: ${onedata::ensure}")
+    file { $onedata::sync_scripts_conf:
+      ensure  => $onedata::ensure,
+      content => epp('onedata/sync-onedata-working.conf.epp'),
+      require => File[$onedata::sync_scripts_dir],
     }
   }
 }

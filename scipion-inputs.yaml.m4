@@ -158,4 +158,17 @@ websockify_ssl_enabled: False  # if True, setup valid admin e-mail below
 # your valid contact e-mail address
 websockify_ssl_email: 'root@localhost'
 
+# Onedata Version
+#onedata_version: 'latest'
+onedata_version: '17.06.0.rc2-1'
+
+# REQUIRED: Onedata Remote Host
+#onedata_host: 'placeholder'
+
+# REQUIRED: Onedata Token
+#onedata_token: 'placeholder'
+
+# REQUIRED: Onedata Workspace (relative directory inside Onedata mount)
+#onedata_workspace: 'placeholder'
+
 # vim: set syntax=yaml
