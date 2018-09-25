@@ -166,7 +166,7 @@ function install_puppet_agent() {
 
     if ! [ -x /opt/puppetlabs/puppet/bin/r10k ]; then
         ctx logger info 'Puppet: installing r10k'
-        sudo -n /opt/puppetlabs/puppet/bin/gem install --quiet r10k
+        sudo -n /opt/puppetlabs/puppet/bin/gem install --quiet r10k --version '< 3.0'
         ctx logger info 'Puppet: installing r10k ... done'
     fi
 }
