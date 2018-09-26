@@ -1,5 +1,7 @@
-#! /bin/bash
-# Sync the working directory to OneData.
+#!/bin/bash
+# Final sync of the local working directory to OneData.
+
+set -e
 
 # Set configuration variables
 source sync-onedata-working.conf

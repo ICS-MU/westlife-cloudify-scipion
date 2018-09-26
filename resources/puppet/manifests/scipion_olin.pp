@@ -31,10 +31,26 @@ if (length("${cuda_release}")>0) {        ## and ($facts['has_nvidia_gpu']==true
     require         => Kmod::Load['nouveau'],
   }
 
-  exec { 'nvidia-xconfig':
-    command => '/usr/bin/nvidia-xconfig -a --use-display-device=None --virtual=1920x1200 --preserve-busid',
-    unless  => '/bin/grep nvidia /etc/X11/xorg.conf',
-    require => Class['cuda'],
+  case $_ensure {
+    present: {
+      exec { 'nvidia-xconfig':
+        command => '/usr/bin/nvidia-xconfig -a --use-display-device=None --virtual=1920x1200 --preserve-busid',
+        unless  => '/bin/grep nvidia /etc/X11/xorg.conf',
+        require => Class['cuda'],
+      }
+
+      Class['cuda']
+        -> Class['onedata']
+    }
+
+    absent: {
+      Class['onedata']
+        -> Class['cuda']
+    }
+
+    default: {
+      fail("Unsupported ensure state: ${_ensure}")
+    }
   }
 }
 

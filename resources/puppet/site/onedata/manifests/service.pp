@@ -30,5 +30,9 @@ class onedata::service {
     command  => $_cmd,
     provider => shell,
     path     => '/bin:/usr/bin:/sbin:/usr/sbin',
+    onlyif   => [
+      "test -x ${onedata::sync_scripts_dir}/onedata-to-working",
+      "test -x ${onedata::sync_scripts_dir}/working-to-onedata",
+    ],
   }
 }

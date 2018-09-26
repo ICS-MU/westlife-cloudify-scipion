@@ -1,45 +1,55 @@
-#! /bin/bash
+#!/bin/bash
+# Sync remote Onedata directory to local working directory
+
+set -e
 
 # Set configuration variables
 source sync-onedata-working.conf
 
 # Parameter checks
-if [ ! -d "$ONEDATA_DIRECTORY" ]
-then
-	echo "Directory $ONEDATA_DIRECTORY doesn't exist. Exitting."
+if [ ! -d "$ONEDATA_DIRECTORY" ]; then
+	echo "ERROR: Directory $ONEDATA_DIRECTORY doesn't exist. Exitting." >&2
 	exit 1
 fi
 
-if [ ! -d "$WORKING_DIRECTORY" ]
-then
-	echo "Directory $WORKING_DIRECTORY doesn't exist. Exitting."
+if [ ! -d "$WORKING_DIRECTORY" ]; then
+	echo "ERROR: Directory $WORKING_DIRECTORY doesn't exist. Exitting." >&2
 	exit 1
 fi
 
+_LOCK_FILE="$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
 
-# Check if it is the very first deployment of this OneData directory
-if [ -e "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME" ] 
-then
-	echo OneData directory "$ONEDATA_DIRECTORY" has already been deployed.
-	echo It is locked with "$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME".
-	echo Check its contents for details.
-	echo Cannot deploy it again.
-	exit 1
+# Check if it is the very first deployment of this OneData directory,
+# exit with success if data were already locked for this machine.
+if [ -e "${_LOCK_FILE}" ]; then
+	_LOCK_HOST=$(egrep -i '^HOST:' "${_LOCK_FILE}" | cut -d: -f2-)
+
+	if [ "${_LOCK_HOST}" = "$(hostname -f)" ]; then
+		echo "WARNING: OneData directory \"${ONEDATA_DIRECTORY}\" already deployed here." >&2
+		exit
+	else 
+		cat - >&2 <<EOF
+ERROR: OneData directory "$ONEDATA_DIRECTORY" has already been deployed.
+It is locked with "${_LOCK_FILE}".
+Check its contents for details. Cannot deploy it again!
+EOF
+		exit 1
+	fi
 fi
 
-# To business now.
+#####
 
 # Lock the onedata repo as it is to be deployed now
 mkdir -p "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY"
-echo "This folder was deployed on machine `hostname`" \
-	>  "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
-echo "`uname -a`" >> "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
-echo "From $ONEDATA_DIRECTORY" \
-	>>  "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
-echo "To $WORKING_DIRECTORY" \
-	>>  "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
-echo "by `whoami`" >> "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
-echo "on `date`" >> "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
+
+cat - >"${_LOCK_FILE}" <<EOF
+# This folder is already deployed on:
+HOST:$(hostname -f)
+MOUNT:${ONEDATA_DIRECTORY}
+DIR:${WORKING_DIRECTORY}
+USER:$(whoami)
+DATE:$(date --rfc-3339=seconds)
+EOF
 
 # Sync the data from OneData to the working directory
 # Note: --group is not supported by OneData
