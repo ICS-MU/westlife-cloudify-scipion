@@ -79,14 +79,14 @@ cc_data:
 # OS template
 #olin_occi_os_tpl: 'uuid_enmr_centos_7_cerit_sc_187'
 #olin_occi_os_tpl: 'uuid_enmr_egi_ubuntu_server_14_04_lts_cerit_sc_161'
-#olin_occi_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_268'
-olin_occi_os_tpl: 'uuid_enmr_egi_ubuntu_server_16_04_lts_cerit_sc_271'
 #olin_occi_os_tpl: 'uuid_enmr_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_269'
-#olin_occi_os_tpl: 'uuid_gputestmc_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_269'
+olin_occi_os_tpl: 'uuid_gputestmc_gpgpu_egi_ubuntu_server_16_04_lts_cerit_sc_269'
 #olin_occi_os_tpl:  'uuid_gputestmc_egi_ubuntu_server_16_04_lts_cerit_sc_270'
+#olin_occi_os_tpl: 'uuid_enmr_egi_ubuntu_server_16_04_lts_cerit_sc_271'
 
 # sizing
 olin_occi_resource_tpl: 'medium'
+#olin_occi_resource_tpl: 'large'
 
 # availability zone
 olin_occi_availability_zone: 'uuid_fedcloud_cerit_sc_103'
@@ -99,6 +99,7 @@ olin_occi_network_pool: ''
 
 # scratch size (in GB)
 olin_occi_scratch_size: 2
+#olin_occi_scratch_size: 30
 
 # list of filter tags for the Host-pool
 olin_hostpool_tags: ['olin']
