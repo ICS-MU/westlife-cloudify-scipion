@@ -13,6 +13,15 @@ class onedata::install {
     ensure => $_ensure_pkg,
   }
 
+  # mount point
+  # Note: directory should be empty after clean unmount.
+  # If not, we better fail during the directory delete
+  # on purpose.
+  file { $onedata::mountpoint:
+    ensure => $_ensure_dir,
+    force  => true,
+  }
+
   # scratch dir
   file { $onedata::sync_scratch_dir:
     ensure  => directory,

@@ -26,16 +26,19 @@ class onedata (
   contain onedata::install
   contain onedata::config
   contain onedata::service
+  contain onedata::sync
 
   case $ensure {
     present: {
       Class['onedata::install']
         -> Class['onedata::config']
         -> Class['onedata::service']
+        -> Class['onedata::sync']
     }
 
     absent: {
-      Class['onedata::service']
+      Class['onedata::sync']
+        -> Class['onedata::service']
         -> Class['onedata::config']
         -> Class['onedata::install']
     }

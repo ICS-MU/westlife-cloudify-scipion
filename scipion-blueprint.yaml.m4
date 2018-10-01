@@ -269,6 +269,7 @@ ifelse(_PROVISIONER_,`hostpool',`
         <<: *puppet_config
         manifests:
           start: manifests/scipion_olin.pp
+          delete: manifests/scipion_olin_onedata.pp
         hiera:
           westlife::volume::device: /dev/vdc
           westlife::volume::fstype: ext4
