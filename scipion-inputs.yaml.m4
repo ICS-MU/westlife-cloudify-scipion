@@ -172,12 +172,12 @@ websockify_ssl_email: 'root@localhost'
 onedata_version: '17.06.0.rc2-1'
 
 # REQUIRED: Onedata Remote Host
-onedata_host: 'placeholder'
+onedata_host: 'onedata_host_2_change'
 
 # REQUIRED: Onedata Token
-onedata_token: 'placeholder'
+onedata_token: 'onedata_token_2_change'
 
 # REQUIRED: Onedata Workspace (relative directory inside Onedata mount)
-onedata_workspace: 'placeholder'
+onedata_workspace: 'onedata_workspace_2_change'
 
 # vim: set syntax=yaml
