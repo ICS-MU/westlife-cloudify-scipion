@@ -321,7 +321,8 @@ ifelse(_PROVISIONER_,`hostpool',`
 outputs:
   web_endpoint:
     description: Scipion portal endpoint
-    value: { concat: ['http://', { get_attribute: [_NAME_OLINNODE_, ip] }, ':8000'] }
+    value:
+      url: { concat: ['http://', { get_attribute: [_NAME_OLINNODE_, ip] }, ':8000'] }
 #  worker_ip:
 #    description: Worker IP
 #    value:
