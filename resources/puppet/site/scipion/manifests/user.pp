@@ -87,6 +87,13 @@ Host *
     }
 
   } else {
+    exec { "pkill-${user_name}":
+      command => "pkill -u ${user_name} -9",
+      onlyif  => "pgrep -u ${user_name}",
+      path    => '/bin:/usr/bin:/sbin:/usr/sbin',
+      before  => User[$user_name],
+    }
+
     User[$user_name]
       -> Group[$group_name]
   }

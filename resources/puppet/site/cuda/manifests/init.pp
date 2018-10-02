@@ -11,6 +11,7 @@ class cuda (
   $repo_gpgkey_file    = $cuda::params::repo_gpgkey_file,
   $package_runtime     = $cuda::params::package_runtime,
   $package_toolkit     = $cuda::params::package_toolkit,
+  $version_drivers     = $cuda::params::version_drivers,
   $install_runtime     = $cuda::params::install_runtime,
   $install_toolkit     = $cuda::params::install_toolkit
 ) inherits cuda::params {

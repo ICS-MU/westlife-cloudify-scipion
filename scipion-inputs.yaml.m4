@@ -158,6 +158,9 @@ olin_vnc_password: 'Scipion4All'
 # version of CUDA Toolkit deployed on GPU workers
 cuda_release: '8.0'
 
+# version of NVIDIA drivers
+cuda_version_drivers: '390.30-1'
+
 # enable SSL secured access to the VNC secured by Let's Encrypt
 websockify_ssl_enabled: False  # if True, setup valid admin e-mail below
 

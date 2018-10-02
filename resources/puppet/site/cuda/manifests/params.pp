@@ -6,6 +6,7 @@ class cuda::params {
   $repo_gpgkey_content = template('cuda/7fa2af80.pub')
   $package_runtime = 'cuda-runtime'
   $package_toolkit = 'cuda-toolkit'
+  $version_drivers = latest
   $install_runtime = true
   $install_toolkit = true
 

@@ -4,6 +4,13 @@ class cuda::runtime {
     default => purged,
   }
 
+  $_ensure_drivers = $cuda::ensure ? {
+    present => $cuda::version_drivers,
+    default => purged,
+  }
+
+  ###
+
   $_release = regsubst($::cuda::release, '\.', '-', 'G')
   $_packages = ["${::cuda::package_runtime}-${_release}"]
 
@@ -16,16 +23,29 @@ class cuda::runtime {
       }
     }
   } else {
+    ensure_packages(['cuda-drivers'], {
+      'ensure' => $_ensure_drivers,
+      'notify' => Reboot['cuda-reboot'],
+    })
+
     ensure_packages($_packages, {
       'ensure' => $_ensure,
       'notify' => Reboot['cuda-reboot']
     })
 
+    if ($cuda::ensure == 'present') {
+      Package['cuda-drivers']
+        -> Package[$_packages]
+    } else {
+      Package[$_packages]
+        -> Package['cuda-drivers']
+    }
+
     if ($_ensure == 'purged') and ($facts['os']['family'] == 'Debian') {
       exec { 'cuda::runtime::apt-get-autoremove':
         command     => '/usr/bin/apt-get autoremove -fy',
         refreshonly => true,
-        subscribe   => Package[$_packages],
+        subscribe   => [ Package[$_packages], Package['cuda-drivers'] ],
         before      => Reboot['cuda-reboot'],
       }
     }

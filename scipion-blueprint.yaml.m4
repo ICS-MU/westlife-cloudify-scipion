@@ -119,6 +119,8 @@ inputs:
     type: string
   cuda_release:
     type: string
+  cuda_version_drivers:
+    type: string
   websockify_ssl_enabled:
     type: boolean
   websockify_ssl_email:
@@ -210,6 +212,7 @@ ifelse(_PROVISIONER_,`hostpool',`
           westlife::volume::mode: "1777"
           westlife::vnc::password: { get_input: olin_vnc_password }
           cuda::release: { get_input: cuda_release }
+          cuda::version_drivers: { get_input: cuda_version_drivers }
           websockify::ssl_enabled: { get_input: websockify_ssl_enabled }
           websockify::ssl_email: { get_input: websockify_ssl_email }
           onedata::version: { get_input: onedata_version }
@@ -277,6 +280,7 @@ ifelse(_PROVISIONER_,`hostpool',`
           westlife::volume::mode: "1777"
           westlife::vnc::password: { get_input: olin_vnc_password }
           cuda::release: { get_input: cuda_release }
+          cuda::version_drivers: { get_input: cuda_version_drivers }
           websockify::ssl_enabled: { get_input: websockify_ssl_enabled }
           websockify::ssl_email: { get_input: websockify_ssl_email }
           onedata::version: { get_input: onedata_version }
