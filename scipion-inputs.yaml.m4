@@ -162,7 +162,7 @@ cuda_release: '8.0'
 cuda_version_drivers: '390.30-1'
 
 # enable SSL secured access to the VNC secured by Let's Encrypt
-websockify_ssl_enabled: False  # if True, setup valid admin e-mail below
+websockify_ssl_enabled: True  # if True, setup valid admin e-mail below
 
 # your valid contact e-mail address
 websockify_ssl_email: 'root@localhost'
