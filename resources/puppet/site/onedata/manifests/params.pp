@@ -10,7 +10,9 @@ class onedata::params {
   $repo_gpgkey_content = template('onedata/bc7cc544.pub')
 
   # synchronization scripts
-  $sync_scratch_dir = '/scratch'
+  $sync_user = 'scipion'
+  $sync_group = 'scipion'
+  $sync_scratch_dir = '/data/ScipionUserData'
   $sync_scripts_dir = '/opt/onesync'
   $sync_scripts_conf = '/opt/onesync/sync-onedata-working.conf'
 

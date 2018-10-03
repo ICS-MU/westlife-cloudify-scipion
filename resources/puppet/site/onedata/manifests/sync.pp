@@ -2,7 +2,8 @@ class onedata::sync {
   cron { 'onesync-working-to-onedata':
     ensure  => $onedata::ensure,
     command => "cd ${onedata::sync_scripts_dir} && ./working-to-onedata",
-    minute  => '*/5',
+    user    => $onedata::sync_user,
+    minute  => '*/30',
   }
 
   case $onedata::ensure {
@@ -18,6 +19,10 @@ class onedata::sync {
 
       Cron['onesync-working-to-onedata']
         -> Exec['onesync']
+        -> User[$onedata::sync_user]
+
+      Cron['onesync-working-to-onedata']
+        -> User[$onedata::sync_user]
     }
 
     default: {
@@ -28,6 +33,7 @@ class onedata::sync {
   # do initial or final sync
   exec { 'onesync':
     command  => $_cmd,
+    user     => $onedata::sync_user,
     provider => shell,
     path     => '/bin:/usr/bin:/sbin:/usr/sbin',
     onlyif   => [

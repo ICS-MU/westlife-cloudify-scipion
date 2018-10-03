@@ -65,7 +65,7 @@ cfy-test: cfy-deploy cfy-undeploy
 cfm-deploy: cfm-init cfm-exec-install
 
 cfm-undeploy:
-	-cfy executions start -d $(CFM_DEPLOYMENT) uninstall $(CCZE)
+	-cfy executions start --timeout 1000000 -d $(CFM_DEPLOYMENT) uninstall $(CCZE)
 	-cfy deployments delete $(CFM_DEPLOYMENT) $(CCZE)
 	-cfy deployments delete --force $(CFM_DEPLOYMENT) $(CCZE) #???
 	cfy blueprints delete $(CFM_BLUEPRINT) $(CCZE)
@@ -115,7 +115,7 @@ cfm-plugins:
 		cfy plugin upload -y https://github.com/cloudify-cosmo/cloudify-host-pool-plugin/releases/download/1.5/plugin.yaml \
 			https://github.com/cloudify-cosmo/cloudify-host-pool-plugin/releases/download/1.5/cloudify_host_pool_plugin-1.5-py27-none-linux_x86_64-centos-Core.wgn
 
-cfm-$(BASE_BLUEPRINT).tar.bz2: cfm-$(BLUEPRINT) cfm-$(INPUTS) collectors/ scripts/ types/ resources/puppet.tar.gz
+cfm-$(BASE_BLUEPRINT).tar.bz2: cfm-$(BLUEPRINT) cfm-$(INPUTS) scripts/ types/ resources/puppet.tar.gz
 	BZIP2='-9' tar --transform 's,^,blueprint/,' -cjvf $@ $^
 
 cfm-init: cfm-$(BASE_BLUEPRINT).tar.bz2 cfm-plugins
@@ -123,20 +123,20 @@ cfm-init: cfm-$(BASE_BLUEPRINT).tar.bz2 cfm-plugins
 	cfy deployments create -b $(CFM_BLUEPRINT) -i cfm-$(INPUTS) $(CFM_DEPLOYMENT) $(CCZE)
 
 cfm-exec-%:
-	cfy executions start -d $(CFM_DEPLOYMENT) $* $(CCZE)
+	cfy executions start --timeout 1000000 -d $(CFM_DEPLOYMENT) $* $(CCZE)
 	sleep 10
 
 cfm-scale-out:
-	cfy executions start -d $(CFM_DEPLOYMENT) scale -p 'scalable_entity_name=workerNodes' -p 'delta=+1' $(CCZE)
+	cfy executions start --timeout 1000000 -d $(CFM_DEPLOYMENT) scale -p 'scalable_entity_name=workerNodes' -p 'delta=+1' $(CCZE)
 
 cfm-scale-out-hostpool:
-	cfy executions start -d $(CFM_DEPLOYMENT) scale -p 'scalable_entity_name=workerNodesHostPool' -p 'delta=+1' $(CCZE)
+	cfy executions start --timeout 1000000 -d $(CFM_DEPLOYMENT) scale -p 'scalable_entity_name=workerNodesHostPool' -p 'delta=+1' $(CCZE)
 
 cfm-scale-in:
-	cfy executions start -d $(CFM_DEPLOYMENT) scale -p 'scalable_entity_name=workerNodes' -p 'delta=-1' $(CCZE)
+	cfy executions start --timeout 1000000 -d $(CFM_DEPLOYMENT) scale -p 'scalable_entity_name=workerNodes' -p 'delta=-1' $(CCZE)
 
 cfm-scale-in-hostpool:
-	cfy executions start -d $(CFM_DEPLOYMENT) scale -p 'scalable_entity_name=workerNodesHostPool' -p 'delta=-1' $(CCZE)
+	cfy executions start --timeout 1000000 -d $(CFM_DEPLOYMENT) scale -p 'scalable_entity_name=workerNodesHostPool' -p 'delta=-1' $(CCZE)
 
 cfm-outputs:
 	cfy deployments outputs $(CFM_DEPLOYMENT)

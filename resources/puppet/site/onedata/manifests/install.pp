@@ -40,6 +40,11 @@ class onedata::install {
   }
 
   if $onedata::ensure == 'present' {
+    File[$onedata::sync_scratch_dir] {
+      owner => $onedata::sync_user,
+      group => $onedata::sync_group,
+    }
+
     File[$onedata::sync_scripts_dir] {
       source       => 'puppet:///modules/onedata',
       sourceselect => all,

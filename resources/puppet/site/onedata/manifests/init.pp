@@ -6,6 +6,8 @@ class onedata (
   $package             = $onedata::params::package,
   $version             = $onedata::params::version,
   $mountpoint          = $onedata::params::mountpoint,
+  $sync_user           = $onedata::params::sync_user,
+  $sync_group          = $onedata::params::sync_group,
   $sync_scratch_dir    = $onedata::params::sync_scratch_dir,
   $sync_scripts_dir    = $onedata::params::sync_scripts_dir,
   $sync_scripts_conf   = $onedata::params::sync_scripts_conf,

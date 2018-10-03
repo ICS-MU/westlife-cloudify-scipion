@@ -15,7 +15,7 @@ class scipion::config {
   file { "/home/${scipion::user::user_name}/ScipionUserData":
     ensure => $_ensure_link,
     target => '/data/ScipionUserData',
-    before  => Exec['configure'],
+    before => Exec['configure'],
   }
 
   ##############################################################

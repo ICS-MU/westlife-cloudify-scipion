@@ -124,21 +124,21 @@ package { ['tk-dev','python-pip']:
 #  ensure => present,
 #}
 
-##############################################################
-# Create NFS shares (TODO)
-
-class { '::nfs':
-  server_enabled => true
-}
-nfs::server::export{ '/data/ScipionUserData':
-  ensure  => 'mounted',
-  clients => '(rw,sync,no_root_squash,no_subtree_check)'
-}
-
-nfs::server::export{ '/opt':
-  ensure  => 'mounted',
-  clients => '(rw,sync,no_root_squash,no_subtree_check)'
-}
+# ##############################################################
+# # Create NFS shares (TODO)
+# 
+# class { '::nfs':
+#   server_enabled => true
+# }
+# nfs::server::export{ '/data/ScipionUserData':
+#   ensure  => 'mounted',
+#   clients => '(rw,sync,no_root_squash,no_subtree_check)'
+# }
+# 
+# nfs::server::export{ '/opt':
+#   ensure  => 'mounted',
+#   clients => '(rw,sync,no_root_squash,no_subtree_check)'
+# }
 
 class { 'scipion':
   ensure => $_ensure,
