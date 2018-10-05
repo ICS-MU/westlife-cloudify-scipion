@@ -1,0 +1,13 @@
+#!/bin/bash
+# Final sync of the local working directory to OneData.
+
+set -e
+
+# Set configuration variables
+source sync-onedata-working.conf
+
+./working-to-onedata
+
+rm "$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
+
+find "${WORKING_DIRECTORY}" -mindepth 1 -delete

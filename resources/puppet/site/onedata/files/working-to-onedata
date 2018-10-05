@@ -1,0 +1,43 @@
+#!/bin/bash
+# Sync the local working directory back to OneData
+
+set -e
+
+# Set configuration variables
+source sync-onedata-working.conf
+
+_LOCK_FILE="$ONEDATA_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LOCKFILENAME"
+
+if [ -e "${_LOCK_FILE}" ]; then
+	_LOCK_HOST=$(egrep -i '^HOST:' "${_LOCK_FILE}" | cut -d: -f2-)
+
+	if [ "${_LOCK_HOST}" != "$(hostname -f)" ]; then
+		cat - >&2 <<EOF
+ERROR: Directory locked on different host!
+Current host: $(hostname -f)
+Locked host: ${_LOCK_HOST}
+EOF
+		exit 1
+	fi
+else
+	cat - >&2 <<EOF
+ERROR: Missing lock file "${_LOCK_FILE}".
+The directory has probably never been deployed.
+No action will be taken here, exitting.
+EOF
+	exit 1
+fi
+
+###
+
+# Collect symlinks
+find "$WORKING_DIRECTORY/" -type l \
+	-printf "\"%h\" \"%f\" \"%l\"\n" \
+	 > "$WORKING_DIRECTORY/$ONEDATA_STATUS_SUBDIRECTORY/$ONEDATA_LINKFILENAME"
+
+# Sync data from working directory to OneData, ignoring symlinks for now
+# Note: --group is not supported by OneData
+rsync --recursive --perms --times --delete \
+	--verbose \
+	$WORKING_DIRECTORY/ $ONEDATA_DIRECTORY/
+

@@ -1,0 +1,10 @@
+[Unit]
+Description=websockify.service
+After=network.target
+
+[Service]
+ExecStart=<%= $websockify::_cmd %>
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

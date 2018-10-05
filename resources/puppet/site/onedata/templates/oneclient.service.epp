@@ -1,0 +1,14 @@
+[Unit]
+Description=Onedata client service
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/oneclient.env
+ExecStartPre=/bin/mkdir -p $ONECLIENT_MOUNT
+ExecStart=/usr/bin/oneclient -i -o allow_other $ONECLIENT_MOUNT
+ExecStop=/bin/fusermount -uz $ONECLIENT_MOUNT
+Restart=on-failure
+Type=forking
+
+[Install]
+WantedBy=default.target

@@ -13,6 +13,7 @@ cfy-scipion-blueprint.yaml
 cfy-scipion-inputs.yaml
 cfm-scipion-blueprint.yaml
 cfm-scipion-inputs.yaml
+cfm-scipion-blueprint.tar.bz2
 
 # Other
 get-cloudify.py

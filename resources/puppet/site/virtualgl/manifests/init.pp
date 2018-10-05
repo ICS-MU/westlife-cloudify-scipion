@@ -1,4 +1,5 @@
 class virtualgl (
+  $ensure           = $virtualgl::params::ensure,
   $version          = $virtualgl::params::version,
   $package          = $virtualgl::params::package,
   $package_url_base = $virtualgl::params::package_url_base,

@@ -25,62 +25,142 @@ ctx_node_properties() {
     echo "${PROP}"
 }
 
-#install python
+# force yum/apt-get to use IPv4
+function pkg_ipv4() {
+    if [ -n "${IS_YUM}" ]; then
+        if ! grep -q ip_resolve /etc/yum.conf; then
+            echo 'ip_resolve=4' | sudo -n tee -a /etc/yum.conf >/dev/null
+        fi
+    elif [ -n "${IS_APT}" ]; then
+        if ! apt-config dump | grep -q Acquire::ForceIPv4; then
+            echo 'Acquire::ForceIPv4 "true";' | sudo -n tee -a /etc/apt/apt.conf.d/99force-ipv4 >/dev/null
+        fi
+    fi
+}
+
+# install python
 function install_python() {
-     if ! python --version &>/dev/null; then
-         if [ -n "${IS_YUM}" ]; then
-             sudo -n yum -yq install python
-         elif [ -n "${IS_APT}" ]; then
-             for i in {1..10}; do
-                 sudo -n apt-get -y update >/dev/null
-                 sudo -n apt-get -y install python >/dev/null && break
-                 sleep 6
-             done
-             ctx logger info 'Python just installed.'
-         fi
-     fi
+    if ! python --version &>/dev/null; then
+        local STATUS=1
+
+        if [ -n "${IS_YUM}" ]; then
+            sudo -n yum -yq install python
+            STATUS=$?
+        elif [ -n "${IS_APT}" ]; then
+            for i in {1..10}; do
+                [ $i -ne 1 ] && sleep 5
+
+                sudo -n apt-get -y update >/dev/null || continue
+                sudo -n apt-get -y install python >/dev/null || continue
+
+                STATUS=0
+                break
+            done
+        fi
+
+        if [ $STATUS -ne 0 ]; then
+            ctx logger error 'Failed to install Python'
+            exit 1
+        fi          
+
+        ctx logger info 'Python installed'
+    fi
 }
 
 # install jq
 function install_jq() {
     if ! jq --version &>/dev/null; then
+        local STATUS=1
+
         if [ -n "${IS_YUM}" ]; then
             sudo -n yum -yq install jq
+            STATUS=$?
         elif [ -n "${IS_APT}" ]; then
-            sudo -n apt-get -y install jq >/dev/null
+            for i in {1..10}; do
+                [ $i -ne 1 ] && sleep 5
+
+                sudo -n apt-get -y update >/dev/null || continue
+                sudo -n apt-get -y install jq >/dev/null || continue
+
+                STATUS=0
+                break
+            done
         fi
+
+        if [ $STATUS -ne 0 ]; then
+            ctx logger error 'Failed to install jq'
+            exit 1
+        fi
+
+        ctx logger info 'jq installed'
     fi
 }
 
-# install agent
-function install_pc1_agent() {
+# install Puppet agent
+function install_puppet_agent() {
     if ! [ -x /opt/puppetlabs/bin/puppet ]; then
         ctx logger info 'Puppet: installing Puppet Agent'
         PC_REPO=$(ctx_node_properties 'puppet_config.repo')
         if [ "x${PC_REPO}" != 'x' ]; then
+            local STATUS=1
+
             if [ -n "${IS_YUM}" ]; then
-                sudo -n rpm -i "${PC_REPO}"
+                sudo -n rpm -i "${PC_REPO}" 
+                STATUS=$?
             elif [ -n "${IS_APT}" ]; then
                 local PC_REPO_PKG=$(mktemp)
                 wget -O "${PC_REPO_PKG}" "${PC_REPO}"
-                sudo -n dpkg -i ${PC_REPO_PKG}
-                sudo -n apt-get -qq update
+                for i in {1..10}; do
+                    [ $i -ne 1 ] &&  sleep 5
+
+                    sudo -n dpkg -i ${PC_REPO_PKG} >/dev/null || continue
+                    sudo -n apt-get -qq update || continue
+
+                    STATUS=0
+                    break
+                done
                 unlink ${PC_REPO_PKG}
             fi
+
+            if [ $STATUS -ne 0 ]; then
+                ctx logger error 'Puppet: failed to install repository package'
+                exit 1
+            fi          
         else
             ctx logger warning 'Puppet: missing repository package'
         fi
 
         PC_PACKAGE=$(ctx_node_properties 'puppet_config.package')
         if [ "x${PC_PACKAGE}" != 'x' ]; then
+            local STATUS=1
+
             if [ -n "${IS_YUM}" ]; then
                 sudo -n yum -y -q install "${PC_PACKAGE}"
-            elif [ -n "${IS_APT}" ]; then
-                sudo -n apt-get -y install "${PC_PACKAGE}" >/dev/null
+                STATUS=$?
+            elif [ -n "${IS_APT}" ]; then 
+                for i in {1..10}; do
+                    [ $i -ne 1 ] && sleep 5
+
+                    sudo -n apt-get -y update >/dev/null || continue
+                    sudo -n apt-get -y install "${PC_PACKAGE}" >/dev/null || continue
+
+                    STATUS=0
+                    break
+                done
+
+                if [ $STATUS -ne 0 ]; then
+                    ctx logger error 'Puppet: failed to install agent'
+                    exit 1
+                fi          
+
+                # Debian has a very bad habit to enable installed services
+                sudo -n systemctl stop puppet mcollective || /bin/true
+                sudo -n systemctl disable puppet mcollective || /bin/true
             fi
         else
             ctx logger error 'Puppet: missing Puppet package name'
         fi
+
         ctx logger info 'Puppet: installing Puppet Agent ... done'
     fi
 
@@ -102,13 +182,20 @@ function puppet_recipes() {
         tar -xf ${MANIFESTS_FILE} -C ${1}
         ctx logger info 'Puppet: extracting recipes ... done'
 
-        # install modules
+        # install modules (into user's home)
         cd ${1}
         PUPPETFILE="${1}/Puppetfile"
-        ctx logger info 'Puppet: installing modules '
-        test -f ${PUPPETFILE} && \
-            sudo /opt/puppetlabs/puppet/bin/r10k puppetfile install ${PUPPETFILE}
-        ctx logger info 'Puppet: installing modules ... done'
+        if [ -f "${PUPPETFILE}" ]; then
+            if diff "${PUPPETFILE}" ~/Puppetfile &>/dev/null; then
+                ctx logger info 'Puppet: modules already installed ... skipping'
+            else
+                ctx logger info 'Puppet: installing modules '
+                /opt/puppetlabs/puppet/bin/r10k puppetfile install \
+                    -v debug --moduledir "${HOME}/modules/" ${PUPPETFILE}
+                cp "${PUPPETFILE}" ~/Puppetfile
+                ctx logger info 'Puppet: installing modules ... done'
+            fi
+        fi
     fi
 }
 
@@ -160,21 +247,15 @@ function puppet_facts() {
 
 #############################
 
-echo "Runner.sh starting"
-
 CTX_SIDE="${relationship_side:-$1}"
 
-# install python
-install_python
-
-# install jq
-install_jq
-
 # install Puppet on very first run
-install_pc1_agent
+pkg_ipv4
+install_python
+install_jq
+install_puppet_agent
 
 CTX_TYPE=$(ctx type)
-
 CTX_OPERATION_NAME=$(ctx operation name | rev | cut -d. -f1 | rev)
 MANIFEST="${manifest:-$(ctx_node_properties "puppet_config.manifests.${CTX_OPERATION_NAME}" 2>/dev/null)}"
 if [ "x${MANIFEST}" = 'x' ]; then
@@ -218,37 +299,28 @@ puppet_hiera "${HIERA_DIR}"
 FACTS_DIR=$(mktemp -d "${MANIFESTS}/facts.XXXXXX")
 puppet_facts "${FACTS_DIR}"
 
-ctx logger info "CTX_OPERATION_NAME=${CTX_OPERATION_NAME}"
-ctx logger info "CTX_TYPE=${CTX_TYPE}"
-ctx logger info "CTX_SIDE=${CTX_SIDE}"
-ctx logger info "CTX_NODE_NAME=${CTX_NODE_NAME}"
-ctx logger info "CTX_NODE_PROPS=${CTX_NODE_PROPS}"
-ctx logger info "CTX_DEPLOYMENT_ID=${CTX_DEPLOYMENT_ID}"
-ctx logger info "CTX_WORKFLOW_ID=${CTX_WORKFLOW_ID}"
-ctx logger info "CTX_CAPS=${CTX_CAPS}"
-
-
 cd ${MANIFESTS}
 
 # run Puppet
 ctx logger info "Puppet: running manifest ${MANIFEST}"
 
-#PUPPET_OUT=$(LANG=C LC_ALL=C sudo -En /opt/puppetlabs/bin/puppet apply \
-#    --hiera_config="${HIERA_DIR}/hiera.yaml" \
-#    --modulepath="${MANIFESTS}/modules:${MANIFESTS}/site:${FACTS_DIR}" \
-##    ${MANIFEST} 2>&1)
-
-
-sudo -En /opt/puppetlabs/bin/puppet apply \
+PUPPET_OUT=$(LANG=C LC_ALL=C sudo -En /opt/puppetlabs/bin/puppet apply \
     --hiera_config="${HIERA_DIR}/hiera.yaml" \
-    --modulepath="${MANIFESTS}/modules:${MANIFESTS}/site:${FACTS_DIR}" \
-    --verbose --detailed-exitcodes ${MANIFEST}
+    --modulepath="${HOME}/modules:${MANIFESTS}/modules:${MANIFESTS}/site:${FACTS_DIR}" \
+    --verbose --logdest=syslog --logdest=console --color=no --detailed-exitcodes \
+    ${MANIFEST} 2>&1)
 
 PUPPET_RTN=$?
 
-#ctx logger info "Puppet: ${PUPPET_OUT}"
-ctx logger info 'Puppet: done'
-ctx logger info "Puppet exit code: ${PUPPET_RTN}"
+# too long Puppet output write line by line
+ARG_MAX=$(getconf ARG_MAX)
+if [ "${#PUPPET_OUT}" -lt $(( $ARG_MAX - 100 )) ]; then
+    ctx logger info "Puppet: ${PUPPET_OUT}"
+else
+    echo "${PUPPET_OUT}" | while IFS=$'\n' read -r LINE; do
+        ctx logger info "Puppet: ${LINE}"
+    done
+fi
 
 # https://docs.puppet.com/puppet/latest/man/apply.html
 # 0: The run succeeded with no changes or failures; the system was already in the desired state.
@@ -257,7 +329,9 @@ ctx logger info "Puppet exit code: ${PUPPET_RTN}"
 # 4: The run succeeded, and some resources failed.
 # 6: The run succeeded, and included both changes and failures.
 if [ ${PUPPET_RTN} -eq 1 ] || [ ${PUPPET_RTN} -eq 4 ] || [ ${PUPPET_RTN} -eq 6 ]; then
+    ctx logger info "Puppet: done with errors (${PUPPET_RTN})!"
     exit ${PUPPET_RTN}
 else
+    ctx logger info 'Puppet: done'
     exit 0
 fi

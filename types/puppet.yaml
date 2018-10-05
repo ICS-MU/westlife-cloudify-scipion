@@ -1,9 +1,38 @@
 node_types:
-  gromacs.nodes.puppet.server:
+  gromacs.nodes.puppet.Server:
     derived_from: cloudify.occi.nodes.Server
     properties:
       fabric_env:
         default: {}
+
+  gromacs.nodes.puppet.HostPoolServer:
+    derived_from: cloudify.hostpool.nodes.LinuxHost
+    properties:
+      fabric_env:
+        default: {}
+      hostpool_service_url:
+        default: ''
+    interfaces:
+      cloudify.interfaces.worker_installer:
+        install:
+          implementation: agent.worker_installer.tasks.install
+        start:
+          implementation: agent.worker_installer.tasks.start
+        stop:
+          implementation: agent.worker_installer.tasks.stop
+        uninstall:
+          implementation: agent.worker_installer.tasks.uninstall
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: hostpool.cloudify_hostpool_plugin.tasks.acquire
+          inputs:
+            service_url:
+              default: { get_property: [ SELF, hostpool_service_url ] }
+        delete:
+          implementation: hostpool.cloudify_hostpool_plugin.tasks.release
+          inputs:
+            service_url:
+              default: { get_property: [ SELF, hostpool_service_url ] }
 
   gromacs.nodes.puppet.SoftwareComponent:
     derived_from: cloudify.nodes.SoftwareComponent

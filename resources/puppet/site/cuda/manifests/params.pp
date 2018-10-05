@@ -1,10 +1,12 @@
 class cuda::params {
+  $ensure = present
   $repo_manage = true
   $repo_rooturl = 'http://developer.download.nvidia.com/compute/cuda/repos'
   $repo_gpgkey_id = 'F60F4B3D7FA2AF80'
   $repo_gpgkey_content = template('cuda/7fa2af80.pub')
   $package_runtime = 'cuda-runtime'
   $package_toolkit = 'cuda-toolkit'
+  $version_drivers = latest
   $install_runtime = true
   $install_toolkit = true
 

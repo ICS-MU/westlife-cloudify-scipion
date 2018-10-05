@@ -1,60 +1,68 @@
+$_ensure = $facts['cloudify_ctx_operation_name'] ? {
+  delete  => absent,
+  stop    => absent,
+  default => present,
+}
+
 # clean firewall rules
 resources { 'firewall':
   purge => true,
 }
 
-include ::firewall
-include wget
-include ::westlife::volume
-#include ::archive
+Package {
+  require => Class['apt::update'],
+}
 
-
-$onedataurl = 'http://get.onedata.org/oneclient.sh'
-
-
-#letsencrypt
-
-class { '::letsencrypt':
-        email               => 'pesa@ics.muni.cz',
-        unsafe_registration => true,
-      }
-
-letsencrypt::certonly { $fqdn:
-        plugin               => 'standalone',
-        manage_cron          => true,
-        cron_before_command  => '/bin/systemctl stop websockify.service',
-        cron_success_command => '/bin/systemctl restart websockify.service',
-        suppress_cron_output => true,
-        before               => Class['websockify'],
-      }
-
-
+include apt
+include firewall
+include westlife::volume
 
 # CUDA runtime
-kmod::load { 'nouveau':
-  ensure => absent,
-}
+# setup CUDA only if release specified
+$cuda_release = lookup('cuda::release')
+if (length("${cuda_release}")>0) {        ## and ($facts['has_nvidia_gpu']==true) {
+  kmod::load { 'nouveau':
+    ensure => absent,
+  }
 
-class {'cuda':
-  release         => '8.0',
-  install_toolkit => false,
-  require         => Kmod::Load['nouveau'],
-}
+  class {'cuda':
+    ensure          => $_ensure,
+    install_toolkit => false,
+    require         => Kmod::Load['nouveau'],
+  }
 
-exec { 'nvidia-xconfig':
-  command => '/usr/bin/nvidia-xconfig -a --use-display-device=None --virtual=1920x1200 --preserve-busid',
-  unless  => '/bin/grep nvidia /etc/X11/xorg.conf',
-  require => Class['cuda'],
+  case $_ensure {
+    present: {
+      exec { 'nvidia-xconfig':
+        command => '/usr/bin/nvidia-xconfig -a --use-display-device=None --virtual=1920x1200 --preserve-busid',
+        unless  => '/bin/grep nvidia /etc/X11/xorg.conf',
+        require => Class['cuda'],
+      }
+
+      Class['cuda']
+        -> Class['onedata']
+    }
+
+    absent: {
+      Class['onedata']
+        -> Class['cuda']
+    }
+
+    default: {
+      fail("Unsupported ensure state: ${_ensure}")
+    }
+  }
 }
 
 # X environment
 ensure_packages(['lightdm', 'xfce4', 'xterm', 'mesa-utils'])
 
 class { 'turbovnc':
-  passwords => { 'cfy' => lookup('westlife::vnc::password') },
+  ensure    => $_ensure,
+  passwords => { 'scipion' => lookup('westlife::vnc::password') },
   servers   => {
     1 => {
-      'user' => 'cfy',
+      'user' => 'scipion',
       'args' => '-geometry 1024x768 -nohttpd',
 #      'args' => '-geometry 1024x768 -nohttpd -xstartup openbox',
     },
@@ -74,25 +82,32 @@ file {'10-xhost.conf':
 # add repository
 # sudo add-apt-repository ppa:openjdk-r/ppa
 #apt::ppa { 'ppa:openjdk-r/ppa': }
+#
+#exec {'add-apt-repository':
+#  command => 'sudo add-apt-repository ppa:openjdk-r/ppa',
+#  path    => '/usr/bin/',
+#}
+#
+#exec { 'apt-get-update':
+#  command => "/usr/bin/apt-get update",
+#  require => Exec['add-apt-repository'],
+#}
 
-exec {'add-apt-repository':
-  command => 'sudo add-apt-repository ppa:openjdk-r/ppa',
-  path    => '/usr/bin/',
-}
-
-exec { 'apt-get-update':
-  command => "/usr/bin/apt-get update",
-  require => Exec['add-apt-repository'],
+apt::ppa { 'ppa:openjdk-r/ppa':
+  ensure => $_ensure,
 }
 
 # openjdk-8-jdk
 package { ['libopenmpi-dev','openmpi-bin','gfortran','cmake']:
-  ensure => present,
-  require => Exec['apt-get-update'],
+  ensure => $_ensure,
+  #require => Exec['apt-get-update'],
+  require => Apt::Ppa['ppa:openjdk-r/ppa'],
 }
+
 package { ['tk-dev','python-pip']:
-  ensure => present,
-  require => Exec['apt-get-update'],
+  ensure => $_ensure,
+  #require => Exec['apt-get-update'],
+  require => Apt::Ppa['ppa:openjdk-r/ppa'],
 }
 
 
@@ -109,31 +124,52 @@ package { ['tk-dev','python-pip']:
 #  ensure => present,
 #}
 
-##############################################################
-# Create NFS shares (TODO)
+# ##############################################################
+# # Create NFS shares (TODO)
+# 
+# class { '::nfs':
+#   server_enabled => true
+# }
+# nfs::server::export{ '/data/ScipionUserData':
+#   ensure  => 'mounted',
+#   clients => '(rw,sync,no_root_squash,no_subtree_check)'
+# }
+# 
+# nfs::server::export{ '/opt':
+#   ensure  => 'mounted',
+#   clients => '(rw,sync,no_root_squash,no_subtree_check)'
+# }
 
-class { '::nfs':
-  server_enabled => true
-}
-nfs::server::export{ '/data/ScipionUserData':
-  ensure  => 'mounted',
-  clients => '(rw,sync,no_root_squash,no_subtree_check)'
+class { 'scipion':
+  ensure => $_ensure,
 }
 
-nfs::server::export{ '/opt':
-  ensure  => 'mounted',
-  clients => '(rw,sync,no_root_squash,no_subtree_check)'
+if $_ensure == present {
+  Class['scipion'] -> Class['turbovnc']
+} else {
+  Class['turbovnc'] -> Class['scipion']
 }
 
-class {'scipion':
-}
 
 ##############################################################
 # Download Onedata client
+
 class {'onedata':
+  ensure => $_ensure,
 }
 
 #############################################################
-#Install websockify&novnc
-class {'websockify':
+# Install websockify&novnc
+
+class { 'novnc':
+  ensure => $_ensure,
+}
+
+class { 'websockify':
+  ensure      => $_ensure,
+  source_port => 8000,
+  target_addr => 'localhost',
+  target_port => 5901,
+  web         => '/opt/novnc',
+  require     => Class['novnc'],
 }

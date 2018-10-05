@@ -1,0 +1,23 @@
+# Configuration file for scripts syncing data between OneData FUSE mount and a
+# working directory.
+
+# scratch directory on the local machine to deploy the data into
+# MUST be an absolute path
+WORKING_DIRECTORY="<%= $onedata::sync_scratch_dir %>"
+
+# OneData mount point
+# MUST be an absolute path
+ONEDATA_MOUNT_POINT="<%= $onedata::mountpoint %>"
+
+# directory to synchronise between the OneData tree and the working directory
+# NOTE: it may not be the whole mount point, it must be at least one level
+# down. The top level dir of the OneData mount point is not writable.
+ONEDATA_DIRECTORY="$ONEDATA_MOUNT_POINT/<%= $onedata::workspace %>"
+
+# those need to be in the config file, but they are not intended to be
+# configurable during the deployment
+ONEDATA_STATUS_SUBDIRECTORY=".deployment_status_do_not_delete"
+ONEDATA_LINKFILENAME="linklist"
+ONEDATA_LOCKFILENAME="lock"
+
+

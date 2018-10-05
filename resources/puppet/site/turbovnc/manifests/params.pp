@@ -1,4 +1,5 @@
 class turbovnc::params {
+  $ensure = present
   $version = '2.1.1'
   $package = 'turbovnc'
   $package_url_base = 'https://sourceforge.net/projects/turbovnc/files/<%= @version %>/'
