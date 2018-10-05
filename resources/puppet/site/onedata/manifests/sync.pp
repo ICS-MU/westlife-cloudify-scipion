@@ -19,10 +19,14 @@ class onedata::sync {
 
       Cron['onesync-working-to-onedata']
         -> Exec['onesync']
-        -> User[$onedata::sync_user]
 
-      Cron['onesync-working-to-onedata']
-        -> User[$onedata::sync_user]
+      if defined(User[$onedata::sync_user]) {
+        Cron['onesync-working-to-onedata']
+          -> User[$onedata::sync_user]
+
+        Exec['onesync']
+          -> User[$onedata::sync_user]
+      }
     }
 
     default: {
