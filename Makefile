@@ -8,9 +8,9 @@ BLUEPRINT=$(BASE_BLUEPRINT).yaml
 M4BLUEPRINT=$(BLUEPRINT).m4
 
 # blueprint/deployment names
-CFY_BLUEPRINT=scipion
-CFM_BLUEPRINT=scipion
-CFM_DEPLOYMENT=scipion
+CFY_BLUEPRINT?=scipion
+CFM_BLUEPRINT?=scipion
+CFM_DEPLOYMENT?=scipion
 
 RETRIES=50
 VIRTUAL_ENV?=~/cfy
