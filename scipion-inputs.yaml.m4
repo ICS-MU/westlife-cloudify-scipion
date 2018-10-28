@@ -2,6 +2,7 @@
 
 define(SQ,')
 
+ifdef(`_PROVISIONER_',`',`
 ############################################
 # Provisioner
 #
@@ -10,6 +11,7 @@ define(SQ,')
 
 define(_PROVISIONER_, occi)dnl
 # define(_PROVISIONER_, hostpool)dnl
+')
 
 
 ############################################
