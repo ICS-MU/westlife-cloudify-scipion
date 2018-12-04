@@ -104,7 +104,7 @@ olin_occi_scratch_size: 2
 #olin_occi_scratch_size: 30
 
 # list of filter tags for the Host-pool
-olin_hostpool_tags: ['olin']
+olin_hostpool_tags: ['scipion-worker']
 
 
 
