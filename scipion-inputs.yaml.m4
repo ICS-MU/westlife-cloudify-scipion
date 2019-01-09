@@ -170,8 +170,8 @@ websockify_ssl_enabled: True  # if True, setup valid admin e-mail below
 websockify_ssl_email: 'root@localhost'
 
 # Onedata Version
-#onedata_version: 'latest'
-onedata_version: '17.06.0.rc2-1'
+onedata_version: 'latest'
+#onedata_version: '17.06.0.rc2-1'
 
 # REQUIRED: Onedata Remote Host
 onedata_host: 'onedata_host_2_change'
