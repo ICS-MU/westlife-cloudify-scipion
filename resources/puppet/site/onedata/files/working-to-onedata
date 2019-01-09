@@ -3,6 +3,11 @@
 
 set -e
 
+if [ -z "$ONEDATA_NOT_BROKEN_ANYMORE ]; then
+	echo $0: Onedata is broken, doing nothing
+	exit 0
+fi
+
 # Set configuration variables
 source sync-onedata-working.conf
 
